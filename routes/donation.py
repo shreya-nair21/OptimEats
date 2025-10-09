@@ -11,12 +11,11 @@ donations_blueprint = Blueprint('donations', __name__)
 def handle_donation():
     """
     Handles a monetary donation transaction.
-    1. Creates a Donation record (Source of Truth).
+    1. Creates a Donation record.
     2. Atomically updates the target Business's pay_forward_balance.
     """
     data = request.get_json()
     
-    # Required parameters for a successful donation
     amount = data.get('donation')
     business_id = data.get('business_id')
     
@@ -26,9 +25,7 @@ def handle_donation():
     if not amount or not business_id or amount <= 0:
         return jsonify({"error": "Invalid donation amount or missing business ID."}), 400
 
-    # Start a database transaction for data integrity
     try:
-        # Use begin_nested to ensure atomicity
         with db.session.begin_nested():
             # 1. Find the business (must exist to receive a donation)
             business = Business.query.get(business_id)

@@ -6,6 +6,8 @@ db = SQLAlchemy()
 class Business(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    contact = db.Column (db.String(10),unique=True, nullable=False)
+    address = db.Column (db.String(100),unique=True, nullable=False)
     balance = db.Column(db.Float, default=0.0)
     menu_items = db.relationship('Meal', backref='business', lazy=True)
 
@@ -16,6 +18,8 @@ class Business(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'contact':self.contact,
+            'address': self.address,
             'menu_items': self.menu_items,
             'balance': self.balance
         }

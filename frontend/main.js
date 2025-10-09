@@ -1,4 +1,5 @@
 // Money Donation Form
+
 const moneyForm = document.getElementById('moneyDonationForm');
 if (moneyForm) {
   moneyForm.addEventListener('submit', async (e) => {
@@ -6,7 +7,8 @@ if (moneyForm) {
 
     const data = {
       donor_name: document.getElementById('donorName').value,
-      amount: document.getElementById('amount').value
+      amount: document.getElementById('amount').value,
+      business_id: document.getElementById('business-dropdown').value
     };
 
     try {
