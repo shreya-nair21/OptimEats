@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In Need Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fff7f7;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container-main {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #2c3e50;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .meals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .meal-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      padding: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .meal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .meal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .meal-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .meal-price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #27ae60;
+      background: #d5f4e6;
+      padding: 5px 12px;
+      border-radius: 5px;
+    }
+
+    .business-info {
+      background: #ecf0f1;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 0.95rem;
+    }
+
+    .business-name {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .business-balance {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .balance-positive {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .claim-btn {
+      width: 100%;
+      background: #27ae60;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .claim-btn:hover {
+      background: #229954;
+    }
+
+    .claim-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.1rem;
+      color: #7f8c8d;
+    }
+
+    .error {
+      background: #fadbd8;
+      color: #c0392b;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .success {
+      background: #d5f4e6;
+      color: #27ae60;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .no-meals {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7f8c8d;
+    }
+  </style>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">OptimEats</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="home.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="donations.html">Donations</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="business.html">Business</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="in_need.html">In-Need</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</head>
+<body style="padding-top: 70px;">
+
+  <div class="container-main">
+    <div class="header">
+      <h1>🍽️ Available Meals</h1>
+      <p>Browse meals available in your community</p>
+    </div>
+
+    <div id="message-container"></div>
+
+    <div id="loading" class="loading">
+      Loading available meals...
+    </div>
+
+    <div id="meals-container" class="meals-grid" style="display: none;"></div>
+
+    <div id="no-meals" class="no-meals" style="display: none;">
+      <h3>No Meals Available</h3>
+      <p>Check back later for available meals</p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5000';
+
+    // Fetch available meals on page load
+    document.addEventListener('DOMContentLoaded', fetchAvailableMeals);
+
+    async function fetchAvailableMeals() {
+      const loading = document.getElementById('loading');
+      const container = document.getElementById('meals-container');
+      const noMeals = document.getElementById('no-meals');
+      const messageContainer = document.getElementById('message-container');
+
+      try {
+        const response = await fetch(`${API_BASE}/api/meals/available`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to fetch meals');
+        }
+
+        loading.style.display = 'none';
+
+        if (data.meals.length === 0) {
+          noMeals.style.display = 'block';
+          return;
+        }
+
+        container.style.display = 'grid';
+        container.innerHTML = data.meals.map(meal => createMealCard(meal)).join('');
+
+      } catch (error) {
+        loading.style.display = 'none';
+        messageContainer.innerHTML = `<div class="error">⚠️ ${error.message}</div>`;
+        console.error('Fetch error:', error);
+      }
+    }
+
+    function createMealCard(meal) {
+      const canClaim = meal.can_claim;
+      return `
+        <div class="meal-card">
+          <div class="meal-header">
+            <div class="meal-name">${meal.name}</div>
+            <div class="meal-price">₹${meal.price}</div>
+          </div>
+          <div class="business-info">
+            <div class="business-name">${meal.business_name}</div>
+            <div class="business-balance">
+              Available Balance: 
+              <span class="${canClaim ? 'balance-positive' : 'text-danger'}">
+                ₹${meal.business_balance}
+              </span>
+            </div>
+          </div>
+          <button class="claim-btn" ${!canClaim ? 'disabled' : ''} 
+            onclick="claimMeal(${meal.id}, ${meal.price}, '${meal.name}')">
+            ${canClaim ? 'Claim Meal' : 'Insufficient Balance'}
+          </button>
+        </div>
+      `;
+    }
+
+    async function claimMeal(mealId, price, mealName) {
+      const messageContainer = document.getElementById('message-container');
+      
+      const userId = prompt('Enter your User ID:');
+      if (!userId) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/users/${userId}/claim_meal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ menu_id: mealId })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageContainer.innerHTML = `
+            <div class="success">
+              ✅ ${mealName} claimed successfully! New balance: ₹${result.new_balance}
+            </div>
+          `;
+          setTimeout(fetchAvailableMeals, 2000);
+        } else {
+          messageContainer.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+        }
+      } catch (error) {
+        messageContainer.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
