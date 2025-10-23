@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app import db 
-from models import Donation, Business # Need Donation model for record and Business for balance update
+from models import db, Donation, Business # Need Donation model for record and Business for balance update
 
 # Create a Blueprint instance for the donations routes
 donations_blueprint = Blueprint('donations', __name__)
@@ -62,7 +61,6 @@ def handle_donation():
 @donations_blueprint.route('/api/donations/business/<int:business_id>', methods=['GET'])
 def get_business_donations(business_id):
     """Retrieves all donation records for a specific business."""
-    # Note: Using .all() here is fine for a demo, but should be paginated in a real app.
     donations = Donation.query.filter_by(business_id=business_id).order_by(Donation.timestamp.desc()).all()
     
     return jsonify([donation.to_dict() for donation in donations])

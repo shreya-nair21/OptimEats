@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify,Blueprint
 from datetime import date
 import os
 from app import db 
-from models import User, Business, Menu, MealClaimed, Donation
+from models import User, Business, Meal, MealClaimed, Donation
 
 # Create a Blueprint instance for the user routes
 users_blueprint = Blueprint('users', __name__)
