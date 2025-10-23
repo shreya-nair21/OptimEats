@@ -12,7 +12,7 @@ businesses_blueprint = Blueprint('businesses', __name__)
 @businesses_blueprint.route('/businesses/register', methods=['POST'])
 def create_business():
     data = request.get_json()
-    
+
     # Check for mandatory fields and handle missing data
     if not data or 'name' not in data:
         return jsonify({"error": "Missing JSON data or 'name' field"}), 400
