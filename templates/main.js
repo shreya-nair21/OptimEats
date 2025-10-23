@@ -1,4 +1,5 @@
 // Money Donation Form
+
 const moneyForm = document.getElementById('moneyDonationForm');
 if (moneyForm) {
   moneyForm.addEventListener('submit', async (e) => {
@@ -6,7 +7,8 @@ if (moneyForm) {
 
     const data = {
       donor_name: document.getElementById('donorName').value,
-      amount: document.getElementById('amount').value
+      amount: document.getElementById('amount').value,
+      business_id: document.getElementById('business-dropdown').value
     };
 
     try {
@@ -68,17 +70,24 @@ if (businessForm) {
       address: document.getElementById('address').value
     };
 
-    try {
-      const response = await fetch('http://localhost:5000/api/businesses', {
+try {
+      const response = await fetch('http://localhost:5000/businesses/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
-      const result = await response.json();
-      alert('Business registered successfully!');
-      businessForm.reset(); // clear form
-      console.log(result);
+      if (response.ok) { // Check if the response status is 200-299 (success)
+        alert('Business registered successfully!');
+        
+        // 🌟 THE FIX: Redirect to the main page ('/')
+        window.location.href = '/'; 
+        
+      } else {
+        const errorData = await response.json();
+        alert(`Registration failed: ${errorData.error || response.statusText}`);
+      }
+      
     } catch (error) {
       alert('Error submitting business registration.');
       console.error(error);

@@ -8,8 +8,6 @@ from routes.user import user_blueprint, donor_blueprint
 
 def create_app():
   app = Flask(__name__)
-
-
   #basic config
   app.config['SECRET_KEY'] = 'your_secret_key'
   app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -42,17 +40,15 @@ def create_app():
     print("Food donation received: ", data)
     return jsonify({"status" : "success" , "message" : "Food Donation recorded"})
   
-  # Business registration
-  @app.route('/api/businesses', methods=['POST'])
-  def businesses():
-    data = request.json
-    print("Business registration received: ", data)
-    return jsonify({"status" : "success" , "message" : "Business registered"})
-
-
+  @app.route('/business')
+  def business():
+    return render_template("business.html")
+  
+ 
   return app
 
 if __name__ == "__main__":
   app = create_app()
+  db.init_app(app)
   db.init_app(app)
   app.run(debug=True)
