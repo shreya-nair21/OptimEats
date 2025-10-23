@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 from flask_cors import CORS
-from routes.meals import meals_blueprint
-# from routes.business 
-# from routes.donation 
-# from routes.users 
+from OptimEats.routes.meal import meals_blueprint
+from models import db
+from routes.business import businesses_blueprint
+from routes.donation import donations_blueprint
+from routes.user import user_blueprint, donor_blueprint
 
 def create_app():
   app = Flask(__name__)
@@ -11,15 +12,22 @@ def create_app():
 
   #basic config
   app.config['SECRET_KEY'] = 'your_secret_key'
-
+  app.config ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+  
   CORS(app)
+  #registering all blueprints
   app.register_blueprint(meals_blueprint)
-# test route
+  app.register_blueprint(businesses_blueprint)
+  app.register_blueprint(donations_blueprint)
+  app.register_blueprint(user_blueprint)
+  app.register_blueprint(donor_blueprint)
+
+# Home page
   @app.route('/')
   def home():
-    return "Flask backend setup successful!"
+    return render_template ('home.html')
+    # return "Flask backend setup successful!"
   
-
 # Money donation
   @app.route('/api/donations', methods=['POST'])
   def donations():
@@ -46,4 +54,5 @@ def create_app():
 
 if __name__ == "__main__":
   app = create_app()
+  db.init_app(app)
   app.run(debug=True)

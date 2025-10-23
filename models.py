@@ -20,7 +20,7 @@ class Business(db.Model):
             'balance': self.balance
         }
 
-class Users(db.Model):
+class User(db.Model):
     id = db.Column (db.Integer, primary_key=True)
     name = db.Column (db.String(100), unique= True, nullable=False)
     total_meals = db.Column (db.Integer)

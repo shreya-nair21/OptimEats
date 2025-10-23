@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify,Blueprint
 from datetime import date
 import os
-from app import db 
-from models import User, Business, Menu, MealClaimed, Donation
+from models import db 
+from models import User, Business, Meal, MealClaimed, Donation
 
 # Create a Blueprint instance for the user routes
-users_blueprint = Blueprint('users', __name__)
+user_blueprint = Blueprint('user', __name__)
 
 # Define the maximum daily meals (plus dependents)
 MEALS_PER_DEPENDENT = 2
@@ -13,7 +13,7 @@ MEALS_PER_DEPENDENT = 2
 # --- CRUD Operations for User ---
 
 # CREATE (Register a New User) - Used for both regular users and initial business registration
-@users_blueprint.route('/api/users', methods=['POST'])
+@user_blueprint.route('/api/users', methods=['POST'])
 def create_user():
     data = request.get_json()
     try:
@@ -30,13 +30,13 @@ def create_user():
         return jsonify({'error': 'Failed to create user', 'details': str(e)}), 400
 
 # READ (Get a single User)
-@users_blueprint.route('/api/users/<int:id>', methods=['GET'])
+@user_blueprint.route('/api/users/<int:id>', methods=['GET'])
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user.to_dict())
 
 # UPDATE (Modify User Details, e.g., dependents)
-@users_blueprint.route('/api/users/<int:id>', methods=['PUT'])
+@user_blueprint.route('/api/users/<int:id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get_or_404(id)
     data = request.get_json()
@@ -51,7 +51,7 @@ def update_user(id):
         return jsonify({'error': 'Failed to update user', 'details': str(e)}), 400
 
 # DELETE (Delete a User)
-@users_blueprint.route('/api/users/<int:id>', methods=['DELETE'])
+@user_blueprint.route('/api/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get_or_404(id)
     # The cascading rules defined in models should handle deletion of related records
@@ -61,7 +61,7 @@ def delete_user(id):
 
 # --- MEAL CLAIMING  ---
 
-@users_blueprint.route('/api/users/<int:user_id>/claim_meal', methods=['POST'])
+@user_blueprint.route('/api/users/<int:user_id>/claim_meal', methods=['POST'])
 def claim_meal(user_id):
     """
     Handles a user claiming a meal, checks daily limits, updates business balance, 
@@ -78,7 +78,7 @@ def claim_meal(user_id):
     try:
         with db.session.begin_nested():
             user = User.query.get_or_404(user_id)
-            menu_item = Menu.query.get_or_404(menu_id)
+            menu_item = Meal.query.get_or_404(menu_id)
             business = Business.query.get_or_404(menu_item.business_id)
 
             # 1. ENFORCE DAILY MEAL LIMITS

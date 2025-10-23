@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app import db 
+from models import db 
 from models import Donation, Business # Need Donation model for record and Business for balance update
 
 # Create a Blueprint instance for the donations routes

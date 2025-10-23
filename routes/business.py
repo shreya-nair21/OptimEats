@@ -1,8 +1,8 @@
 # app.py
 from flask import Blueprint,Flask, request, jsonify
 import os
-from app import db 
-from models import Business, Menu # Import only the necessary models
+from models import db 
+from models import Business, Meal # Import only the necessary models
 
 # Create a Blueprint instance for the business routes
 businesses_blueprint = Blueprint('businesses', __name__)
@@ -57,7 +57,7 @@ def add_menu_item(business_id):
     business = Business.query.get_or_404(business_id)
     data = request.get_json()
     try:
-        new_menu_item = Menu(
+        new_menu_item = Meal(
             name=data['name'],
             price=data['price'],
             business_id=business_id

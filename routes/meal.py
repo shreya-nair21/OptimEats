@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app import db 
+from models import db 
 from models import Meal, Business
 
 # Create a Blueprint instance for the meals routes
