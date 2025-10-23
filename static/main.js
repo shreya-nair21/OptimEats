@@ -79,8 +79,6 @@ try {
 
       if (response.ok) { // Check if the response status is 200-299 (success)
         alert('Business registered successfully!');
-        
-        // 🌟 THE FIX: Redirect to the main page ('/')
         window.location.href = '/'; 
         
       } else {

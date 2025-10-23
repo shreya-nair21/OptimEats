@@ -32,13 +32,13 @@ def handle_donation():
             if not business:
                 return jsonify({'error': 'Target business not found.'}), 404
 
-            # 2. Create the Donation record (Source Data)
-            new_donation = Donation(
-                user_id=user_id,
-                business_id=business_id,
-                donation=amount
-            )
-            db.session.add(new_donation)
+            # Create donation item here or seperately in CRUD in user.py
+            # new_donation = Donation(
+            #     user_id=user_id,
+            #     business_id=business_id,
+            #     donation=amount
+            # )
+            # db.session.add(new_donation)
 
             # 3. Update the business's balance
             business.balance += amount
@@ -49,7 +49,7 @@ def handle_donation():
         return jsonify({
             "message": "Donation recorded and balance updated successfully.",
             "new_balance": business.balance,
-            "donation_id": new_donation.id
+            # "donation_id": new_donation.id
         }), 201
 
     except Exception as e:

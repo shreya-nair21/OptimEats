@@ -145,8 +145,8 @@ donor_blueprint = Blueprint('donation', __name__)
 def create_donor():
     data = request.get_json()
     new_donor = Donation(
-        donation=data['donation'],
-        user_id=data['user_id'],
+        name = data['donorName'],
+        donation=data['amount'],
         business_id = data['business_id']
     )
     db.session.add(new_donor)

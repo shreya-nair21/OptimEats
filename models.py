@@ -59,7 +59,7 @@ class MealClaimed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
-    menu_id = db.Column(db.Integer, db.ForeignKey('menu.id'), nullable=False)
+    menu_id = db.Column(db.Integer, db.ForeignKey('meal.id'), nullable=False)
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
     
     def __repr__(self):

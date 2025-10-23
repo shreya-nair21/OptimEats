@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify,render_template
 from flask_cors import CORS
-from OptimEats.routes.meal import meals_blueprint
+
 from models import db
+
+from routes.meal import meals_blueprint
 from routes.business import businesses_blueprint
 from routes.donation import donations_blueprint
 from routes.user import user_blueprint, donor_blueprint
@@ -44,11 +46,16 @@ def create_app():
   def business():
     return render_template("business.html")
   
+  @app.route('/donation')
+  def donation():
+    return render_template("donations.html")
+  
  
   return app
 
 if __name__ == "__main__":
   app = create_app()
   db.init_app(app)
-  db.init_app(app)
+  with app.app_context():
+        db.create_all()
   app.run(debug=True)

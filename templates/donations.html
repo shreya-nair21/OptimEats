@@ -84,7 +84,7 @@
             // Function to fetch data and populate the dropdown
             async function getBusinesses() {
                 try {
-                    const response = await fetch('/businesse');
+                    const response = await fetch('/businesses');
                     
                     // Check if the response is ok (status code 200-299)
                     if (!response.ok) {
@@ -94,11 +94,12 @@
                     const businesses = await response.json();
                     
                     // Clear the "Loading..." option
-                    dropdown.innerHTML = '';
+                    dropdown.innerHTML = '<option value="">-- Select a Business --</option>';
                     
                     // Populate the dropdown with received data
                     businesses.forEach(business => {
                         const option = document.createElement('option');
+                        option.value = business.id;
                         option.textContent = business.name;
                         dropdown.appendChild(option);
                     });
