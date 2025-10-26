@@ -1,0 +1,99 @@
+/* :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #111; }
+body { margin: 0; padding: 24px; background: #f7f8fb; }
+.container { max-width: 960px; margin: 0 auto; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+h1 { font-size:20px; margin:0; }
+.balance { background:#fff; padding:14px 18px; border-radius:8px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+.grid { display:grid; grid-template-columns: 1fr 420px; gap:18px; align-items:start; }
+.card { background:#fff; padding:16px; border-radius:8px; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+form label { display:block; font-size:13px; margin-top:10px; }
+input[type="text"], input[type="number"], textarea, select {
+    width:100%; padding:8px 10px; margin-top:6px; border:1px solid #d6d9df; border-radius:6px; box-sizing:border-box;
+}
+textarea { min-height:80px; resize:vertical; }
+.actions { margin-top:12px; display:flex; gap:8px; }
+button { background:#0b74de; color:white; padding:10px 14px; border:none; border-radius:6px; cursor:pointer; }
+button.secondary { background:#eef2f6; color:#0b74de; }
+.meals-list { width:100%; border-collapse:collapse; margin-top:8px; }
+.meals-list th, .meals-list td { text-align:left; padding:10px; border-bottom:1px solid #f0f2f5; font-size:14px; }
+.thumb { width:56px; height:40px; object-fit:cover; border-radius:6px; background:#eee; }
+.muted { color:#6b7280; font-size:13px; }
+.empty { padding:18px; text-align:center; color:#6b7280; }
+.preview { display:block; margin-top:8px; max-width:100%; max-height:160px; object-fit:cover; border-radius:6px; }
+@media (max-width:900px) { .grid { grid-template-columns: 1fr; } } */
+
+css of
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  margin-top: 20px;
+  width: 100%;
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+.message {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+}
+
+.register-text {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.register-text a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.register-text a:hover {
+  text-decoration: underline;
+}

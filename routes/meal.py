@@ -5,6 +5,11 @@ from models import Meal, Business
 # Create a Blueprint instance for the meals routes
 meals_blueprint = Blueprint('meals', __name__)
 
+#CRUD of meal 
+# @meals_blueprint.route('/meal/add',method=['POST'])
+# def create_meal():
+#     data.get_json()
+
 # --- GET ALL AVAILABLE MEALS ---
 @meals_blueprint.route('/api/meals', methods=['GET'])
 def get_all_meals():
