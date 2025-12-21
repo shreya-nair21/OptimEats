@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Page</title>
+
+  <!-- Link to external CSS -->
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form onsubmit="return handleLogin(event)">
+      <label for="email">Email</label>
+      <input type="text" id="business_email" name="username" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required />
+
+      <button type="submit">Login</button>
+    </form>
+    <div class="message" id="message"></div>
+    <p class="register-text">
+      Don’t have an account? <a href="business_registration.html">Register here</a>
+    </p>
+  </div>
+
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('business_email').value;
+      const password = document.getElementById('password').value;
+
+      // Simple mock check
+      if (username === 'admin' && password === '1234') {
+        document.getElementById('message').textContent = '✅ Login successful!';
+        document.getElementById('message').style.color = 'green';
+        window.location.href = 'business_user_page.html';
+
+      } else {
+        document.getElementById('message').textContent = '❌ Invalid username or password.';
+        document.getElementById('message').style.color = 'red';
+      }
+    }
+  </script>
+</body>
+</html>
