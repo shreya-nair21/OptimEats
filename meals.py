@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app import db 
-from models import Meal, Business
+from models import db, Meal, Business
 
 # Create a Blueprint instance for the meals routes
 meals_blueprint = Blueprint('meals', __name__)
@@ -76,7 +75,6 @@ def get_available_meals():
     Useful for the "In Need" dashboard to show which meals can be claimed.
     """
     try:
-        # Get all businesses with positive balance
         available_businesses = Business.query.filter(Business.balance > 0).all()
         
         meals_data = []

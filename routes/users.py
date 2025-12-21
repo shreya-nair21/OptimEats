@@ -1,8 +1,7 @@
-from flask import Flask, request, jsonify,Blueprint
-from datetime import date
-import os
-from app import db 
-from models import User, Business, Menu, MealClaimed, Donation
+from flask import Blueprint, request, jsonify
+from datetime import date, datetime, time
+from sqlalchemy import func
+from models import db, User, Business, Meal, MealClaimed, Donation
 
 # Create a Blueprint instance for the user routes
 users_blueprint = Blueprint('users', __name__)
@@ -12,15 +11,20 @@ MEALS_PER_DEPENDENT = 2
 
 # --- CRUD Operations for User ---
 
-# CREATE (Register a New User) - Used for both regular users and initial business registration
 @users_blueprint.route('/api/users', methods=['POST'])
 def create_user():
     data = request.get_json()
     try:
-        new_user = User(
-            # Default to regular user, will be linked to a business later for providers
+        # Basic validation
+        if not data.get('name') or not data.get('email'):
+             return jsonify({'error': 'Name and email are required'}), 400
 
-            dependents=data.get('dependents', 0)
+        new_user = User(
+            name=data['name'],
+            email=data['email'],
+            phone=data.get('phone'),
+            dependents=data.get('dependents', 0),
+            password= data.get('password') 
         )
         db.session.add(new_user)
         db.session.commit()
@@ -29,13 +33,11 @@ def create_user():
         db.session.rollback()
         return jsonify({'error': 'Failed to create user', 'details': str(e)}), 400
 
-# READ (Get a single User)
 @users_blueprint.route('/api/users/<int:id>', methods=['GET'])
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user.to_dict())
 
-# UPDATE (Modify User Details, e.g., dependents)
 @users_blueprint.route('/api/users/<int:id>', methods=['PUT'])
 def update_user(id):
     user = User.query.get_or_404(id)
@@ -43,6 +45,8 @@ def update_user(id):
     try:
         if 'dependents' in data:
             user.dependents = data['dependents']
+        if 'phone' in data:
+            user.phone = data['phone']
         
         db.session.commit()
         return jsonify(user.to_dict())
@@ -50,11 +54,9 @@ def update_user(id):
         db.session.rollback()
         return jsonify({'error': 'Failed to update user', 'details': str(e)}), 400
 
-# DELETE (Delete a User)
 @users_blueprint.route('/api/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get_or_404(id)
-    # The cascading rules defined in models should handle deletion of related records
     db.session.delete(user)
     db.session.commit()
     return '', 204
@@ -69,24 +71,24 @@ def claim_meal(user_id):
     """
     data = request.get_json()
     menu_id = data.get('menu_id')
-    # force_claim = data.get('force_claim', False) 
 
     if not menu_id:
         return jsonify({"error": "Missing menu_id"}), 400
 
-    # Start a database transaction for data integrity
     try:
-        with db.session.begin_nested():
+        with db.session.begin_nested(): 
             user = User.query.get_or_404(user_id)
-            menu_item = Menu.query.get_or_404(menu_id)
-            business = Business.query.get_or_404(menu_item.business_id)
+            meal_item = Meal.query.get_or_404(menu_id) 
+            business = Business.query.get_or_404(meal_item.business_id)
 
             # 1. ENFORCE DAILY MEAL LIMITS
             meal_cap = user.total_meals + (MEALS_PER_DEPENDENT * user.dependents)
             
+
             # Count meals claimed today by this user
+            today_start = datetime.combine(date.today(), time.min)
             claimed_today = MealClaimed.query.filter_by(user_id=user_id)\
-                                        .filter(db.cast(MealClaimed.timestamp, db.Date) == date.today())\
+                                        .filter(MealClaimed.timestamp >= today_start)\
                                         .count()
             
             if claimed_today >= meal_cap:
@@ -96,24 +98,14 @@ def claim_meal(user_id):
                 }), 403
 
             # 2. CHECK BUSINESS BALANCE
-            meal_price = menu_item.price
+            meal_price = meal_item.price
             if business.balance < meal_price:
-                return jsonify({
-                    "error": f"Not enough balance for this meal: New Balance = {business.balance < meal_price}",
+                 return jsonify({
+                    "error": "Business has insufficient balance.",
+                    "business_balance": business.balance
                 }), 403
-                # if not force_claim:
-                #     # If not confirmed, ask the frontend to prompt the user
-                #     new_balance = business.pay_forward_balance - meal_price
-                #     return jsonify({
-                #         "error": "Insufficient balance. Requires confirmation to proceed.",
-                #         "current_balance": business.pay_forward_balance,
-                #         "new_balance": new_balance,
-                #         "confirmation_required": True
-                #     }), 402 # 402 Payment Required status code
             
-            # 3. EXECUTE TRANSACTION: CREATE RECORD AND UPDATE BALANCE
-            
-            # Create the claim record (Source Data)
+            # 3. EXECUTE TRANSACTION
             new_claim = MealClaimed(
                 user_id=user_id, 
                 business_id=business.id, 
@@ -122,58 +114,17 @@ def claim_meal(user_id):
             )
             db.session.add(new_claim)
             
-            # Update the balance (Derived Data)
-            business.pay_forward_balance -= meal_price
+            business.balance -= meal_price
 
-        # Commit the main transaction
         db.session.commit()
         
         return jsonify({
             "message": "Meal claimed successfully",
-            "new_balance": business.pay_forward_balance
+            "new_balance": business.balance
         }), 201
 
     except Exception as e:
-        # If any part of the transaction failed, this ensures everything is rolled back
         db.session.rollback()
         return jsonify({'error': 'Transaction failed', 'details': str(e)}), 500
 
-
-donor_blueprint = Blueprint('donation', __name__)
-
-@donor_blueprint.route('/api/donors', methods=['POST'])
-def create_donor():
-    data = request.get_json()
-    new_donor = Donation(
-        donation=data['donation'],
-        user_id=data['user_id'],
-        business_id = data['business_id']
-    )
-    db.session.add(new_donor)
-    db.session.commit()
-    return jsonify(new_donor.to_dict()), 201
-
-   
-# # READ all businesses
-# @donor_blueprint.route('/api/donors', methods=['GET'])
-# def get_donors():
-#     donors = Donor.query.all()
-#     return jsonify([donor.to_dict() for donor in donors])
-
-# # READ a single business
-# @donor_blueprint.route('/api/donors/<int:id>', methods=['GET'])
-# def get_donor(id):
-#     donor = Donor.query.get_or_404(id)
-#     return jsonify(donor.to_dict())
-
-# # UPDATE a business
-# @donor_blueprint.route('/api/donors/<int:id>', methods=['PUT'])
-# def update_donor(id):
-#     donor = Donor.query.get_or_404(id)
-#     data = request.get_json()
-#     donor.name = data.get('name', donor.name)
-#     donor.donation = data.get('donation', donor.donation)
-#     donor.business_id = data.get('business_id', donor.business_id)
-#     db.session.commit()
-#     return jsonify(donor.to_dict())
 

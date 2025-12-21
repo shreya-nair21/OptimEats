@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,14 +40,14 @@
     .meal-card {
       background: white;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
       padding: 20px;
       transition: transform 0.3s, box-shadow 0.3s;
     }
 
     .meal-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
 
     .meal-header {
@@ -149,11 +150,11 @@
   </style>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">OptimEats</a>
+      <a class="navbar-brand" href="/">OptimEats</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="home.html">Home</a>
+            <a class="nav-link" href="/">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="donations.html">Donations</a>
@@ -169,6 +170,7 @@
     </div>
   </nav>
 </head>
+
 <body style="padding-top: 70px;">
 
   <div class="container-main">
@@ -192,7 +194,7 @@
   </div>
 
   <script>
-    const API_BASE = 'http://localhost:5000';
+    const API_BASE = '';
 
     // Fetch available meals on page load
     document.addEventListener('DOMContentLoaded', fetchAvailableMeals);
@@ -223,7 +225,7 @@
 
       } catch (error) {
         loading.style.display = 'none';
-        messageContainer.innerHTML = `<div class="error">⚠️ ${error.message}</div>`;
+        messageContainer.innerHTML = `<div class="error"> ${error.message} </div>`;
         console.error('Fetch error:', error);
       }
     }
@@ -255,7 +257,7 @@
 
     async function claimMeal(mealId, price, mealName) {
       const messageContainer = document.getElementById('message-container');
-      
+
       const userId = prompt('Enter your User ID:');
       if (!userId) return;
 
@@ -271,18 +273,19 @@
         if (response.ok) {
           messageContainer.innerHTML = `
             <div class="success">
-              ✅ ${mealName} claimed successfully! New balance: ₹${result.new_balance}
+               ${mealName} claimed successfully! New balance: ₹${result.new_balance}
             </div>
           `;
           setTimeout(fetchAvailableMeals, 2000);
         } else {
-          messageContainer.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+          messageContainer.innerHTML = `<div class="error"> ${result.error}</div>`;
         }
       } catch (error) {
-        messageContainer.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+        messageContainer.innerHTML = `<div class="error"> Error: ${error.message}</div>`;
       }
     }
   </script>
 
 </body>
+
 </html>

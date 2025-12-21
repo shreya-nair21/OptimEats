@@ -2,23 +2,28 @@
 const moneyForm = document.getElementById('moneyDonationForm');
 if (moneyForm) {
   moneyForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
 
     const data = {
       donor_name: document.getElementById('donorName').value,
-      amount: document.getElementById('amount').value
+      amount: document.getElementById('amount').value,
+      business_id: 1
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/donations', {
+      const response = await fetch('/api/donations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
       const result = await response.json();
-      alert('Donation submitted successfully!');
-      moneyForm.reset(); // clear form
+      if (response.ok) {
+        alert('Donation submitted successfully!');
+        moneyForm.reset();
+      } else {
+        alert('Error: ' + (result.error || 'Unknown error'));
+      }
       console.log(result);
     } catch (error) {
       alert('Error submitting donation.');
@@ -39,45 +44,38 @@ if (foodForm) {
       quantity: document.getElementById('quantity').value
     };
 
-    try {
-      const response = await fetch('http://localhost:5000/api/food-donations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
 
-      const result = await response.json();
-      alert('Food donation submitted!');
-      foodForm.reset();
-      console.log(result);
-    } catch (error) {
-      alert('Error submitting food donation.');
-      console.error(error);
-    }
+    alert('Food donation feature coming soon!');
   });
 }
 // Business Registration Form
 const businessForm = document.getElementById('businessForm');
 if (businessForm) {
   businessForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
 
     const data = {
       name: document.getElementById('businessName').value,
       contact: document.getElementById('contact').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
       address: document.getElementById('address').value
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/businesses', {
+      const response = await fetch('/api/businesses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
       const result = await response.json();
-      alert('Business registered successfully!');
-      businessForm.reset(); // clear form
+      if (response.ok) {
+        alert('Business registered successfully!');
+        businessForm.reset();
+      } else {
+        alert('Error: ' + (result.error || 'Unknown error'));
+      }
       console.log(result);
     } catch (error) {
       alert('Error submitting business registration.');

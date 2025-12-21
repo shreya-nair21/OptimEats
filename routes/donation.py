@@ -1,54 +1,62 @@
 from flask import Blueprint, request, jsonify
-from app import db 
-from models import Donation, Business # Need Donation model for record and Business for balance update
+from models import db, Donation, Business, User
 
-# Create a Blueprint instance for the donations routes
 donations_blueprint = Blueprint('donations', __name__)
 
-# --- DONATION TRANSACTION (The Core Logic) ---
+# --- DONATION TRANSACTION ---
 
 @donations_blueprint.route('/api/donations', methods=['POST'])
 def handle_donation():
     """
     Handles a monetary donation transaction.
-    1. Creates a Donation record (Source of Truth).
-    2. Atomically updates the target Business's pay_forward_balance.
+    1. Creates a Donation record.
+    2. Atomically updates the target Business's balance.
     """
     data = request.get_json()
     
-    # Required parameters for a successful donation
-    amount = data.get('donation')
+    # Required parameters
+    donor_name = data.get('donor_name') or data.get('donorName')
+    amount = data.get('amount') or data.get('donation')
     business_id = data.get('business_id')
+    user_id = data.get('user_id') # Optional
     
-    # Optional: user_id is included if the donor is logged in
-    user_id = data.get('user_id') 
+    if not donor_name or not amount:
+        return jsonify({"error": "Missing required fields: donor_name, amount"}), 400
 
-    if not amount or not business_id or amount <= 0:
-        return jsonify({"error": "Invalid donation amount or missing business ID."}), 400
-
-    # Start a database transaction for data integrity
     try:
-        # Use begin_nested to ensure atomicity
-        with db.session.begin_nested():
-            # 1. Find the business (must exist to receive a donation)
-            business = Business.query.get(business_id)
-            if not business:
-                return jsonify({'error': 'Target business not found.'}), 404
-
-            # 2. Create the Donation record (Source Data)
-            new_donation = Donation(
-                user_id=user_id,
-                business_id=business_id,
-                donation=amount
-            )
-            db.session.add(new_donation)
-
-            # 3. Update the business's balance
-            business.balance += amount
-
-        # Commit the main transaction
-        db.session.commit()
+        amount = float(amount)
+        if amount <= 0:
+            return jsonify({'error': 'Donation amount must be positive.'}), 400
+    except ValueError:
+        return jsonify({'error': 'Invalid amount format'}), 400
         
+    try:
+        
+        if not business_id:
+             first_business = Business.query.first()
+             if first_business:
+                 business_id = first_business.id
+             else:
+                 return jsonify({'error': 'No businesses registered to receive donations.'}), 404
+
+        business = Business.query.get(business_id)
+        if not business:
+            return jsonify({'error': 'Target business not found.'}), 404
+
+        # Create Donation record
+        new_donation = Donation(
+            user_id=user_id,
+            donor_name=donor_name,
+            business_id=business_id,
+            amount=amount
+        )
+        db.session.add(new_donation)
+
+        # Update business balance
+        business.balance += amount
+
+        db.session.commit()
+    
         return jsonify({
             "message": "Donation recorded and balance updated successfully.",
             "new_balance": business.balance,
@@ -56,30 +64,37 @@ def handle_donation():
         }), 201
 
     except Exception as e:
-        # If anything goes wrong, roll back the transaction
         db.session.rollback()
         return jsonify({'error': 'Donation transaction failed', 'details': str(e)}), 500
 
-# --- READ (Get Donation History for a Business) ---
+# --- READ (Get Donation History) ---
 
 @donations_blueprint.route('/api/donations/business/<int:business_id>', methods=['GET'])
 def get_business_donations(business_id):
-    """Retrieves all donation records for a specific business."""
-    # Note: Using .all() here is fine for a demo, but should be paginated in a real app.
-    donations = Donation.query.filter_by(business_id=business_id).order_by(Donation.timestamp.desc()).all()
+    try:
+       business = Business.query.get_or_404(business_id)
+       donations = Donation.query.filter_by(business_id=business_id).order_by(Donation.timestamp.desc()).all()
     
-    return jsonify([donation.to_dict() for donation in donations])
+       return jsonify({
+        'success': True,
+        'business_name': business.name,
+        'total_donations': len(donations),
+        'total_amount': sum(d.amount for d in donations),
+        'donations': [d.to_dict() for d in donations]
+    }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve donations', 'details': str(e)}), 500
 
-# --- NEW ROUTE: GET PRIORITY BUSINESSES (Negative Balance First) ---
+@donations_blueprint.route('/api/donations/user/<int:user_id>', methods=['GET'])
+def get_user_donations(user_id):
+    try:
+       donations = Donation.query.filter_by(user_id=user_id).order_by(Donation.timestamp.desc()).all()
+       return jsonify({
+        'success': True,
+        'total_donations': len(donations),
+        'total_amount': sum(d.amount for d in donations),
+        'donations': [d.to_dict() for d in donations]
+    }), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to retrieve donations', 'details': str(e)}), 500
 
-@donations_blueprint.route('/api/businesses/priority', methods=['GET'])
-def get_priority_businesses():
-    """
-    Retrieves all businesses, ordered by the lowest (most negative) pay_forward_balance 
-    to show donors which businesses are in deficit and need priority.
-    """
-    # Order by balance ascending (lowest balance first). 
-    # This places the most negative balances at the top.
-    businesses = Business.query.order_by(Business.pay_forward_balance.asc()).all()
-    
-    return jsonify([business.to_dict() for business in businesses])
