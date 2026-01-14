@@ -177,28 +177,23 @@ def create_donor():
     db.session.commit()
     return jsonify(new_donor.to_dict()), 201
 
-   
-# # READ all businesses
-# @donor_blueprint.route('/api/donors', methods=['GET'])
-# def get_donors():
-#     donors = Donor.query.all()
-#     return jsonify([donor.to_dict() for donor in donors])
 
-# # READ a single business
-# @donor_blueprint.route('/api/donors/<int:id>', methods=['GET'])
-# def get_donor(id):
-#     donor = Donor.query.get_or_404(id)
-#     return jsonify(donor.to_dict())
 
-# # UPDATE a business
-# @donor_blueprint.route('/api/donors/<int:id>', methods=['PUT'])
-# def update_donor(id):
-#     donor = Donor.query.get_or_404(id)
-#     data = request.get_json()
-#     donor.name = data.get('name', donor.name)
-#     donor.donation = data.get('donation', donor.donation)
-#     donor.business_id = data.get('business_id', donor.business_id)
-#     db.session.commit()
-#     return jsonify(donor.to_dict())
 
->>>>>>> 6dc93cedb7800b80c6ece16c67487b20e6efe742:routes/user.py
+
+@user_blueprint.route('/api/users/<int:user_id>/history', methods=['GET'])
+
+def get_user_history(user_id):
+
+    user = User.query.get_or_404(user_id)
+
+    donations = Donation.query.filter_by(user_id=user_id).order_by(Donation.timestamp.desc()).all()
+
+    claims = MealClaimed.query.filter_by(user_id=user_id).order_by(MealClaimed.timestamp.desc()).all()
+
+    return jsonify({
+        'user': user.name,
+        'role': user.role,
+        'donations': [d.to_dict() for d in donations],
+        'claimed_meals':[c.to_dict() for c in claims]
+    })
