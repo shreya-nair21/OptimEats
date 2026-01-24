@@ -40,6 +40,14 @@ def create_app():
   def business_page():
     return render_template('business.html') 
   
+  @app.route('/signup.html')
+  def signup_page():
+    return render_template('signup.html') 
+  
+  @app.route('/donor_dashboard.html')
+  def donor_dashboard_page():
+    return render_template('donor_dashboard.html')
+
   @app.route('/in_need.html')
   def in_need_page_route(): 
     return render_template('in_need.html')

@@ -15,6 +15,7 @@ class UserRole(str, Enum):
 class DonationType(str, Enum):
     MONEY = 'money'
     FOOD = 'food'
+    CLOTHES = 'clothes'
 
 # System Config for Emergency Mode
 class SystemConfig(db.Model):
@@ -32,6 +33,7 @@ class Business(db.Model):
     type = db.Column(db.String(50), nullable=True)
     people_count = db.Column(db.Integer, nullable=True)
     balance = db.Column(db.Float, default=0.0)
+    needs = db.Column(db.String(500), nullable=True) # Needs description
     
     # Relationships
     menu_items = db.relationship('Meal', backref='business', lazy=True)
@@ -51,6 +53,7 @@ class Business(db.Model):
             'type': self.type,
             'people_count': self.people_count,
             'balance': self.balance,
+            'needs': self.needs,
             'menu_items': [meal.to_dict() for meal in self.menu_items]
         }
 

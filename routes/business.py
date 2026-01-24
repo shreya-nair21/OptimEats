@@ -22,7 +22,8 @@ def create_business():
             email=data.get('email', ''), # Should be unique
             password=generate_password_hash(data['password']) if data.get('password') else None,
             type=data.get('type'),
-            people_count=data.get('people_count')
+            people_count=data.get('people_count'),
+            needs=data.get('needs')
         )
         db.session.add(new_business)
         db.session.commit()

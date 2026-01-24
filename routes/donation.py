@@ -27,17 +27,23 @@ def handle_donation():
         meal_id = data.get('meal_id')
         quantity = int(data.get('quantity', 1))
 
-        meal = Meal.query.get_or_404(meal_id)
-        # Recalculate or override amount for food donation
-        total_value = meal.price * quantity
-        amount = total_value
+        if meal_id:
+             meal = Meal.query.get_or_404(meal_id)
+             # Recalculate or override amount for food donation
+             total_value = meal.price * quantity
+             amount = total_value
+    
+    if donation_type == 'clothes':
+        quantity = int(data.get('quantity', 1))
+        amount = 0 # Clothes donations track quantity, not monetary value on balance
+        
     
     if not donor_name:
          return jsonify({"error": "Missing required field: donor_name"}), 400
 
     try:
         amount = float(amount)
-        if amount <= 0:
+        if amount < 0:
             return jsonify({'error': 'Donation amount must be positive.'}), 400
     except ValueError:
         return jsonify({'error': 'Invalid amount format'}), 400
@@ -63,11 +69,11 @@ def handle_donation():
             amount=amount,
             type=donation_type,
             meal_id=meal.id if meal else None,
-            quantity=quantity if donation_type == 'food' else 1
+            quantity=quantity if donation_type in ['food', 'clothes'] else 1
         )
         db.session.add(new_donation)
 
-        # Update business balance
+        # Update business balance (only adds value if amount > 0, e.g. money or valued food)
         business.balance += amount
 
         db.session.commit()
@@ -117,6 +123,14 @@ def get_user_donations(user_id):
 @donations_blueprint.route('/api/transparency', methods=['GET'])
 def transparency_report():
     total_donations = db.session.query(func.sum(Donation.amount)).scalar() or 0 
+    
+    # Existing 'meals_provided' counts claims (consumption). 
+    # User might want "Meals Donated" (supply). I'll keep consumption as "provided" but add "donated" stats.
+    # User Request: "Stat 1: Total Meals Donated. Stat 2: Total Clothes Donated."
+    
+    total_meals_donated = db.session.query(func.sum(Donation.quantity)).filter(Donation.type == 'food').scalar() or 0
+    total_clothes_donated = db.session.query(func.sum(Donation.quantity)).filter(Donation.type == 'clothes').scalar() or 0
+    
     total_meals_claimed = db.session.query(func.count(MealClaimed.id)).scalar() or 0
     active_businesses = Business.query.count()
 
@@ -129,6 +143,8 @@ def transparency_report():
     return jsonify({
         'impact_summary': {
             'total_funds_raised': total_donations,
+            'meals_donated': total_meals_donated,
+            'clothes_donated': total_clothes_donated,
             'meals_provided': total_meals_claimed,
             'participating_businesses': active_businesses
         },

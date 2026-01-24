@@ -4,8 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transparency Report</title>
+  <title>Transparency Report - OptimEats</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Recharts is React-based, using Chart.js for vanilla JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Leaflet for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     body {
       background-color: #fff7f7;
@@ -27,11 +33,19 @@
       color: #2ecc71;
     }
 
-    .highlight-table {
+    .chart-container {
       background: white;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
+      margin-bottom: 20px;
+      height: 300px;
+    }
+
+    #map {
+      height: 400px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
   </style>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -39,9 +53,7 @@
       <a class="navbar-brand" href="/">OptimEats</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="business.html">Business Portal</a></li>
-          <li class="nav-item"><a class="nav-link" href="donations.html">User Portal</a></li>
-          <li class="nav-item"><a class="nav-link" href="in_need.html">In-Need Meals</a></li>
+          <li class="nav-item"><a class="nav-link" href="donor_dashboard.html">Donor Dashboard</a></li>
         </ul>
       </div>
     </div>
@@ -50,55 +62,156 @@
 
 <body>
   <div class="container mt-5">
-    <h1 class="text-center mb-5">Transparency & Impact Report</h1>
+    <h1 class="text-center mb-5">Transparency & Impact</h1>
 
     <!-- Stats Row -->
-    <div class="row mb-5" id="stats-container">
-      <div class="col-md-4">
+    <div class="row mb-4">
+      <div class="col-md-3">
         <div class="stat-card">
           <h3 class="stat-number" id="total-funds">₹0</h3>
           <p>Total Funds Raised</p>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="stat-card">
-          <h3 class="stat-number" id="meals-provided">0</h3>
-          <p>Meals Provided</p>
+          <h3 class="stat-number" id="meals-donated">0</h3>
+          <p>Meals Donated</p>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
+        <div class="stat-card">
+          <h3 class="stat-number" id="clothes-donated">0</h3>
+          <p>Clothes Donated</p>
+        </div>
+      </div>
+      <div class="col-md-3">
         <div class="stat-card">
           <h3 class="stat-number" id="active-business">0</h3>
-          <p>Participating Businesses</p>
+          <p>Active Organizations</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-5">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <canvas id="donationChart"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <h3 class="text-center mb-4">Active Donations Live Map</h3>
+        <div id="map"></div>
       </div>
     </div>
 
     <!-- Top Donors -->
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mb-5">
       <div class="col-md-8">
         <h3 class="text-center mb-4">Top Donors</h3>
-        <div class="highlight-table">
-          <table class="table table-striped mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th>Rank</th>
-                <th>Donor Name</th>
-                <th class="text-end">Amount Donated</th>
-              </tr>
-            </thead>
-            <tbody id="top-donors-list">
-              <!-- JS Populates this -->
-            </tbody>
-          </table>
-        </div>
+        <ul class="list-group" id="top-donors-list">
+          <!-- Populated via JS -->
+        </ul>
       </div>
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='main.js') }}"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', loadTransparencyReport);
+    async function initTransparency() {
+      try {
+        const res = await fetch('/api/transparency');
+        const data = await res.json();
+        const summary = data.impact_summary;
+
+        // Update Text Stats
+        document.getElementById('total-funds').textContent = '₹' + summary.total_funds_raised;
+        document.getElementById('meals-donated').textContent = summary.meals_donated;
+        document.getElementById('clothes-donated').textContent = summary.clothes_donated;
+        document.getElementById('active-business').textContent = summary.participating_businesses;
+
+        // Render Charts
+        renderCharts(summary);
+
+        // Render Top Donors
+        const list = document.getElementById('top-donors-list');
+        list.innerHTML = '';
+        data.top_donors.forEach(d => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          li.innerHTML = `${d.name} <span class="badge bg-primary rounded-pill">₹${d.amount}</span>`;
+          list.appendChild(li);
+        });
+
+        // Init Map (Mock locations if no real lat/lng in DB yet, or center on India)
+        initMap();
+
+      } catch (e) {
+        console.error("Failed to load transparency data", e);
+      }
+    }
+
+    function renderCharts(summary) {
+      // Chart 1: Impact Breakdown
+      const ctx1 = document.getElementById('donationChart').getContext('2d');
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Meals Donated', 'Clothes (Items)'],
+          datasets: [{
+            label: 'Quantity',
+            data: [summary.meals_donated, summary.clothes_donated],
+            backgroundColor: ['#f1c40f', '#3498db']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Donation Volumes' } } }
+      });
+
+      // Chart 2: Funds vs Others (Mock Pie for visualization variety)
+      const ctx2 = document.getElementById('categoryChart').getContext('2d');
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Funds (₹)', 'Est. Meal Value (₹)'], // Mocking meal value relationship
+          datasets: [{
+            data: [summary.total_funds_raised, summary.meals_donated * 50], // Assuming ₹50 per meal avg
+            backgroundColor: ['#2ecc71', '#e67e22']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Financial Impact Estimate' } } }
+      });
+    }
+
+    function initMap() {
+      const map = L.map('map').setView([20.5937, 78.9629], 5); // Center on India
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Add dummy markers for "Live" effect or fetch real addresses if geo-coded.
+      // For now, static mock markers to demonstrate functionality as requested.
+      const locations = [
+        { lat: 28.6139, lng: 77.2090, title: "Delhi Orphanage" },
+        { lat: 19.0760, lng: 72.8777, title: "Mumbai Old Age Home" },
+        { lat: 12.9716, lng: 77.5946, title: "Bangalore Care Center" }
+      ];
+
+      locations.forEach(loc => {
+        L.marker([loc.lat, loc.lng]).addTo(map)
+          .bindPopup(loc.title);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initTransparency);
   </script>
 </body>
 

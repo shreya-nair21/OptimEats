@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard - OptimEats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f7ff;
+            padding-top: 70px;
+        }
+
+        .org-card {
+            transition: transform 0.2s;
+        }
+
+        .org-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">OptimEats</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="signup.html">Register</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transparency.html">Transparency</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Marketplace of Need</h2>
+        <p class="text-center text-muted mb-5">Support organizations making a difference.</p>
+
+        <div class="row" id="org-feed">
+            <!-- Organizations will be loaded here -->
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal fade" id="donationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Donate to <span id="modalOrgName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="donationForm">
+                        <input type="hidden" id="modalOrgId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Donor Name</label>
+                            <input type="text" class="form-control" id="modalDonorName" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Donation Type</label>
+                            <select class="form-select" id="modalType" onchange="toggleFields()">
+                                <option value="money">Money</option>
+                                <option value="food">Food</option>
+                                <option value="clothes">Clothes</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="field-amount">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" class="form-control" id="modalAmount">
+                        </div>
+
+                        <div class="mb-3 d-none" id="field-quantity">
+                            <label class="form-label">Quantity (Items/Meals)</label>
+                            <input type="number" class="form-control" id="modalQuantity" value="1">
+                        </div>
+
+                        <!-- For Food: Meal Selection could be added here if needed, keeping simple for now -->
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Confirm Donation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadOrganizations);
+
+        function toggleFields() {
+            const type = document.getElementById('modalType').value;
+            const amountField = document.getElementById('field-amount');
+            const quantityField = document.getElementById('field-quantity');
+
+            if (type === 'money') {
+                amountField.classList.remove('d-none');
+                quantityField.classList.add('d-none');
+            } else {
+                amountField.classList.add('d-none');
+                quantityField.classList.remove('d-none');
+            }
+        }
+
+        async function loadOrganizations() {
+            try {
+                const res = await fetch('/api/businesses');
+                const data = await res.json();
+
+                const container = document.getElementById('org-feed');
+                container.innerHTML = '';
+
+                data.forEach(org => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-4 mb-4';
+                    col.innerHTML = `
+                    <div class="card org-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">${org.name}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">${org.type || 'Organization'}</h6>
+                            <p class="card-text">
+                                <strong>Children/People:</strong> ${org.people_count || 'N/A'}<br>
+                                <strong>Needs:</strong> ${org.needs || 'Financial Support'}
+                            </p>
+                            <button class="btn btn-outline-primary w-100 mt-2" onclick="openDonateModal(${org.id}, '${org.name}')">
+                                Donate to this Home
+                            </button>
+                        </div>
+                    </div>
+                `;
+                    container.appendChild(col);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        let donationModal;
+        function openDonateModal(id, name) {
+            document.getElementById('modalOrgId').value = id;
+            document.getElementById('modalOrgName').textContent = name;
+
+            // Initialize modal if not already
+            if (!donationModal) {
+                donationModal = new bootstrap.Modal(document.getElementById('donationModal'));
+            }
+            donationModal.show();
+        }
+
+        document.getElementById('donationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('modalType').value;
+            const data = {
+                business_id: document.getElementById('modalOrgId').value,
+                donor_name: document.getElementById('modalDonorName').value,
+                type: type
+            };
+
+            if (type === 'money') {
+                data.amount = document.getElementById('modalAmount').value;
+            } else {
+                data.quantity = document.getElementById('modalQuantity').value;
+                if (type === 'food') {
+                    // If it's generic food donation without selecting a specific meal from menu:
+                    // Backend expects 'meal_id' for price calculation or just quantity. 
+                    // For now, let's assume generic food donation treats 'amount' as 0 or handled unless meal_id is passed.
+                    // Revisit backend: handle_donation checks 'meal_id'. If not present?
+                    // Line 27: meal_id = data.get('meal_id'). 
+                    // Line 30: Meal.query.get_or_404(meal_id). 
+                    // CRITIAL: Existing backend will FAIL if meal_id is missing for 'food'.
+                    // I need to update backend to allow generic food donation or handle it.
+                    // Or I switch type to 'clothes' for generic goods if backend logic allows, or just pass a dummy 'meal_id'??
+                    // Better: Update backend to make meal_id optional for food, or add 'GENERIC_FOOD' type?
+                    // The prompt says "Donor enters quantity". 
+                    // I will pass 'clothes' for Packaged Food/Rice as "Goods" to avoid price lookup error.
+                    // Or I fix backend. I'll FIX Backend to make meal_id optional for food.
+                }
+            }
+
+            // Quick fix for the plan: Using 'clothes' for "Goods" or updating backend. 
+            // I will update backend to allow meal_id to be None for Food.
+
+            try {
+                const res = await fetch('/api/donations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Donation Sent! The organization admin has been notified.');
+                    donationModal.hide();
+                    document.getElementById('donationForm').reset();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (e) {
+                alert('Failed to send donation');
+            }
+        });
+    </script>
+</body>
+
+</html>

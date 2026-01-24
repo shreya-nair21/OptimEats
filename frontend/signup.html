@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - OptimEats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 70px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">OptimEats</a>
+        </div>
+    </nav>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <div class="form-card">
+            <h3 class="text-center mb-4">Join OptimEats</h3>
+
+            <!-- Toggle / Tabs -->
+            <ul class="nav nav-pills nav-fill mb-4" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-donor-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-donor" type="button" role="tab">I want to Donate</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-org-tab" data-bs-toggle="pill" data-bs-target="#pills-org"
+                        type="button" role="tab">I am an Organization</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+
+                <!-- Donor Registration -->
+                <div class="tab-pane fade show active" id="pills-donor" role="tabpanel">
+                    <form id="donorForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="donorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="donorEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="donorPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="donorPhone">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Register as Donor</button>
+                    </form>
+                </div>
+
+                <!-- Organization Registration -->
+                <div class="tab-pane fade" id="pills-org" role="tabpanel">
+                    <form id="orgForm">
+                        <div class="mb-3">
+                            <label class="form-label">Organization Type</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="orgType" id="typeOldAge"
+                                        value="old_age_home" checked>
+                                    <label class="form-check-label" for="typeOldAge">Old Age Home</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="orgType" id="typeOrphanage"
+                                        value="orphanage">
+                                    <label class="form-check-label" for="typeOrphanage">Orphanage</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Organization Name</label>
+                            <input type="text" class="form-control" id="orgName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact Person / Info</label>
+                            <input type="text" class="form-control" id="orgContact" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="orgEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="orgPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Count of People (Children/Elders)</label>
+                            <input type="number" class="form-control" id="orgPeople" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Needs (e.g., Rice, Winter Clothes)</label>
+                            <textarea class="form-control" id="orgNeeds" rows="2"
+                                placeholder="List your urgent needs..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="orgAddress" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Register Organization</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle Donor Registration
+        document.getElementById('donorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('donorName').value,
+                email: document.getElementById('donorEmail').value,
+                password: document.getElementById('donorPassword').value,
+                phone: document.getElementById('donorPhone').value
+            };
+
+            try {
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert('Donor Registered Successfully! Please Log In.');
+                    window.location.href = 'donor_dashboard.html'; // Redirect to dashboard or login
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Request failed');
+            }
+        });
+
+        // Handle Org Registration
+        document.getElementById('orgForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                type: document.querySelector('input[name="orgType"]:checked').value,
+                name: document.getElementById('orgName').value,
+                contact: document.getElementById('orgContact').value,
+                email: document.getElementById('orgEmail').value,
+                password: document.getElementById('orgPassword').value,
+                people_count: document.getElementById('orgPeople').value,
+                needs: document.getElementById('orgNeeds').value,
+                address: document.getElementById('orgAddress').value
+            };
+
+            try {
+                const res = await fetch('/businesses/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    alert('Organization Registered Successfully!');
+                    window.location.href = 'business.html'; // Redirect to business main or login
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (err) {
+                alert('Request failed');
+            }
+        });
+    </script>
+</body>
+
+</html>
