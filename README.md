@@ -17,7 +17,7 @@ Backend: Python (Flask)
 
 Database: PostgreSQL / SQLite (managed via SQLAlchemy ORM)
 
-Frontend: HTML5, CSS3, JavaScript (Jinja2 Templates)
+Frontend: HTML5, CSS3, JavaScript
 
 Testing: Pytest (Unit testing for donation logic)
 
