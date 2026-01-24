@@ -1,25 +1,26 @@
-# 🍲 OptimEats
+# OptimEats - Community-Driven Donation Platform
+OptimEats is a "Pay Forward" ecosystem designed to bridge the gap between individual donors and organizations in need (orphanages and old age homes). Built with Python, it ensures that surplus resources reach the right hands with 100% transparency.
 
-OptimEats is a community-driven platform that connects **donors, receivers, NGOs, and volunteers** to reduce food waste and fight hunger.  
-Donors can contribute money or food, receivers can access meals fairly, and NGOs/volunteers can distribute efficiently with the help of AI.
+## Key Features
+Dual-Role Registration: Separate portals for Donors (individuals/businesses) and Receivers (Orphanages/Old Age Homes).
 
----
+Need-Based Dashboard: Organizations can post live requirements (e.g., "50 kids need sweaters") so donors can choose exactly where their help goes.
 
-## 🌟 Features
-- 💰 **Money Donations (Pay Forward)** – fund meals via local businesses.  
-- 🥘 **Food Donations** – schedule pickups or deliver to food banks.  
-- 📊 **Transparency Reports** – track how donations are used.  
-- 🚨 **Emergency Mode** – boost donations during crises.  
-- 🌍 **AI Tools** – demand forecasting & route optimization.  
-- 📞 **Offline Access** – SMS/IVR support for rural users.  
+Pay Forward System: Enables contributing funds via local businesses or direct item donations (food/clothes).
 
----
+Transparency Report: A real-time analytics portal showing total items donated, impact stats, and claim notifications.
 
-## 🛠️ Tech Stack
-- **Frontend**: React.js / React Native  
-- **Backend**: Python (Flask/FastAPI) or Node.js  
-- **Database**: PostgreSQL / MongoDB  
-- **Cloud**: AWS / GCP  
-- **Integrations**: Payment gateway, SMS/IVR, Maps API  
+Smart Logistics (Future): Planned integration for route optimization and AI-based demand forecasting.
+
+## Tech Stack
+Backend: Python (Flask)
+
+Database: PostgreSQL / SQLite (managed via SQLAlchemy ORM)
+
+Frontend: HTML5, CSS3, JavaScript (Jinja2 Templates)
+
+Testing: Pytest (Unit testing for donation logic)
+
+Version Control: Git & GitHub
 
 ---
