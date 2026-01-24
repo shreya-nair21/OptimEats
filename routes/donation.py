@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from models import db, Donation, Business, User
+from sqlalchemy import func, desc
+from models import db, Donation, Business, User, Meal, MealClaimed
 
 donations_blueprint = Blueprint('donations', __name__)
 
@@ -21,15 +22,18 @@ def handle_donation():
     business_id = data.get('business_id')
     user_id = data.get('user_id') # Optional
 
+    meal = None
     if donation_type == 'food':
         meal_id = data.get('meal_id')
         quantity = int(data.get('quantity', 1))
 
         meal = Meal.query.get_or_404(meal_id)
-        business = Business.query.get(business_id)
+        # Recalculate or override amount for food donation
+        total_value = meal.price * quantity
+        amount = total_value
     
-    if not donor_name or not amount:
-        return jsonify({"error": "Missing required fields: donor_name, amount"}), 400
+    if not donor_name:
+         return jsonify({"error": "Missing required field: donor_name"}), 400
 
     try:
         amount = float(amount)
@@ -51,21 +55,20 @@ def handle_donation():
         if not business:
             return jsonify({'error': 'Target business not found.'}), 404
 
-        total_value = meal_price * quantity
         # Create Donation record
         new_donation = Donation(
             user_id=user_id,
             donor_name=donor_name,
             business_id=business_id,
-            amount=total_value,
-            type='food',
-            meal_id=meal_id,
-            quantity=quantity
+            amount=amount,
+            type=donation_type,
+            meal_id=meal.id if meal else None,
+            quantity=quantity if donation_type == 'food' else 1
         )
         db.session.add(new_donation)
 
         # Update business balance
-        business.balance += total_value
+        business.balance += amount
 
         db.session.commit()
     
@@ -111,21 +114,16 @@ def get_user_donations(user_id):
         return jsonify({'error': 'Failed to retrieve donations', 'details': str(e)}), 500
 
 
-
-
-
 @donations_blueprint.route('/api/transparency', methods=['GET'])
 def transparency_report():
     total_donations = db.session.query(func.sum(Donation.amount)).scalar() or 0 
     total_meals_claimed = db.session.query(func.count(MealClaimed.id)).scalar() or 0
     active_businesses = Business.query.count()
 
-
-
     # top 5 donors
     top_donors = db.session.query(
         Donation.donor_name, func.sum(Donation.amount).label('total')
-    ).group_by(Donation.donor_name).ordeR_by(desc('total')).limit(5).all()
+    ).group_by(Donation.donor_name).order_by(desc('total')).limit(5).all()
 
 
     return jsonify({
@@ -134,6 +132,6 @@ def transparency_report():
             'meals_provided': total_meals_claimed,
             'participating_businesses': active_businesses
         },
-        'top_donors': [{'name':name. 'amount': amount} for name, amount in top_donors]
+        'top_donors': [{'name': name, 'amount': amount} for name, amount in top_donors]
     })
 

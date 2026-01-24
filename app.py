@@ -44,6 +44,14 @@ def create_app():
   def in_need_page_route(): 
     return render_template('in_need.html')
 
+  @app.route('/transparency.html')
+  def transparency_page():
+    return render_template('transparency.html')
+
+  @app.route('/dashboard.html')
+  def dashboard_page():
+    return render_template('dashboard.html')
+
   # AUTHENTICATION ROUTES 
   @app.route('/api/auth/login', methods=['POST'])
   def login_user():

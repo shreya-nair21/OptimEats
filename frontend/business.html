@@ -4,98 +4,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Dashboard</title>
+  <title>Old Age / Orphanage portal</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #fff7f7;
-
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      background-color: #f8f9fa;
+      padding-top: 70px;
     }
 
     .form-card {
-      background-color: rgb(243, 243, 243);
+      background: white;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-      margin-bottom: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
       width: 100%;
       max-width: 500px;
-
+      margin: 0 auto;
     }
 
-    button {
-      width: 100%;
+    .nav-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
 
+    .in-need-btn {
+      margin-top: 20px;
     }
   </style>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">OptimEats</a>
-
-      <div class="collapse navbar-collapse">
+      <a class="navbar-brand" href="/">OptimEats</a>
+      <!-- <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="donations.html">Donations</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="business.html">Business</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="in_need.html">In-Need</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="donations.html">User Portal</a></li>
+          <li class="nav-item"><a class="nav-link" href="transparency.html">Transparency</a></li>
+          <li class="nav-item"><a class="nav-link" href="in_need.html">In-Need Meals</a></li>
         </ul>
-      </div>
+      </div> -->
     </div>
   </nav>
+</head>
 
+<body>
 
+  <div class="form-card">
+    <h3 class="text-center mb-4 text-dark">Old Age Home / Orphanage Registration</h3>
+    <form id="businessForm">
 
-<body style="padding-top: 70px;">
-  </head>
+      <div class="mb-3">
+        <label class="form-label"> Type: </label><br>
+        <input type="radio" name="type" value="old_age_home"> Old Age Home</input><br>
+        <input type="radio" name="type" value="orphanage"> Orphanage</input><br>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" id="businessName" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contact Info</label>
+        <input type="text" class="form-control" id="contact" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" required>
+      </div>
 
-  <body>
-    <div class="form-card">
-      <h4 class="text-center mb-4">Business Registration</h4>
-      <form id="businessForm">
-        <div class="mb-3">
-          <label for="businessName" class="form-label">Business Name</label>
-          <input type="text" class="form-control" id="businessName" required>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Number of people </label>
+        <input type="number" class="form-control" id="people" required>
+      </div>
 
-        <div class="mb-3">
-          <label for="contact" class="form-label">Contact Info</label>
-          <input type="text" class="form-control" id="contact" required>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Address</label>
+        <textarea class="form-control" id="address" rows="2" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-dark w-100 py-2">Register</button>
+    </form>
+  </div>
 
-        <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="password" class="form-label">Password</label>
-          <input type="password" class="form-control" id="password" required>
-        </div>
-
-
-        <div class="mb-3">
-          <label for="address" class="form-label">Address</label>
-          <textarea class="form-control" id="address" rows="3" required></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-success w-100">Register</button>
-      </form>
-    </div>
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-  </body>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
 
 </html>

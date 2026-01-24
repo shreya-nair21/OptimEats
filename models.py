@@ -1,8 +1,26 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import CheckConstraint
 from datetime import datetime
+from enum import Enum
 
 db = SQLAlchemy()
+
+# Enums
+class UserRole(str, Enum):
+    USER = 'user'
+    VOLUNTEER = 'volunteer'
+    NGO = 'ngo'
+    ADMIN = 'admin'
+
+class DonationType(str, Enum):
+    MONEY = 'money'
+    FOOD = 'food'
+
+# System Config for Emergency Mode
+class SystemConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.String(200), nullable=False)
 
 class Business(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,6 +29,8 @@ class Business(db.Model):
     address = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=True) 
+    type = db.Column(db.String(50), nullable=True)
+    people_count = db.Column(db.Integer, nullable=True)
     balance = db.Column(db.Float, default=0.0)
     
     # Relationships
@@ -28,6 +48,8 @@ class Business(db.Model):
             'contact': self.contact,
             'address': self.address,
             'email': self.email,
+            'type': self.type,
+            'people_count': self.people_count,
             'balance': self.balance,
             'menu_items': [meal.to_dict() for meal in self.menu_items]
         }
@@ -41,6 +63,7 @@ class User(db.Model):
     phone = db.Column(db.String(20), unique=True, nullable=True)
     total_meals = db.Column(db.Integer, default=2)
     dependents = db.Column(db.Integer, default=0)
+    role = db.Column(db.String(50), default=UserRole.USER.value)
 
     __table_args__ = (
         CheckConstraint('total_meals <= 4 ', name='maximum_meals'),
@@ -64,7 +87,8 @@ class User(db.Model):
             'phone' : self.phone,
             'total_meals' : self.total_meals,
             'daily_limit' : self.get_daily_meal_limit(),
-            'dependents': self.dependents
+            'dependents': self.dependents,
+            'role': self.role
         }
 
 Users = User 
@@ -76,6 +100,11 @@ class Donation(db.Model):
     amount = db.Column(db.Float, default=0.0)
     business_id = db.Column(db.Integer, db.ForeignKey('business.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # New fields for Food Donation
+    type = db.Column(db.String(20), default=DonationType.MONEY.value)
+    meal_id = db.Column(db.Integer, db.ForeignKey('meal.id'), nullable=True)
+    quantity = db.Column(db.Integer, default=1)
 
     def __repr__(self):
         return f'<Donation ${self.amount} to Business {self.business_id}>'
@@ -87,7 +116,10 @@ class Donation(db.Model):
             'donor_name': self.donor_name,
             'amount': self.amount,
             'business_id': self.business_id,
-            'timestamp': self.timestamp.isoformat()
+            'timestamp': self.timestamp.isoformat(),
+            'type': self.type,
+            'meal_id': self.meal_id,
+            'quantity': self.quantity
         }
 
 class MealClaimed(db.Model):

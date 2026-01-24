@@ -7,7 +7,7 @@ businesses_blueprint = Blueprint('businesses', __name__)
 # --- API Routes for CRUD Operations ---
 
 # CREATE a new business
-@businesses_blueprint.route('/api/businesses', methods=['POST'])
+@businesses_blueprint.route('/businesses/register', methods=['POST'])
 def create_business():
     data = request.get_json()
 
@@ -20,7 +20,9 @@ def create_business():
             contact=data.get('contact', ''),
             address=data.get('address', ''),
             email=data.get('email', ''), # Should be unique
-            password=generate_password_hash(data['password']) if data.get('password') else None
+            password=generate_password_hash(data['password']) if data.get('password') else None,
+            type=data.get('type'),
+            people_count=data.get('people_count')
         )
         db.session.add(new_business)
         db.session.commit()
