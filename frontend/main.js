@@ -1,19 +1,17 @@
 // Helper for Notifications (replaces native alert)
 function showNotification(message, type = 'success') {
-  // Check if container exists, if not create it
   let container = document.getElementById('notification-container');
   if (!container) {
     container = document.createElement('div');
     container.id = 'notification-container';
     container.style.position = 'fixed';
-    container.style.top = '20px';
+    container.style.top = '20px'; // Top right
     container.style.right = '20px';
     container.style.zIndex = '1050';
     container.style.minWidth = '300px';
     document.body.appendChild(container);
   }
 
-  // Create alert element
   const alertDiv = document.createElement('div');
   alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
   alertDiv.role = 'alert';
@@ -24,14 +22,13 @@ function showNotification(message, type = 'success') {
 
   container.appendChild(alertDiv);
 
-  // Auto dismiss after 3 seconds
   setTimeout(() => {
     alertDiv.classList.remove('show');
     setTimeout(() => alertDiv.remove(), 150);
   }, 5000);
 }
 
-// User Registration Form (NEW)
+// User Registration Form
 const userRegForm = document.getElementById('userRegForm');
 if (userRegForm) {
   userRegForm.addEventListener('submit', async (e) => {
@@ -42,7 +39,7 @@ if (userRegForm) {
       email: document.getElementById('userEmail').value,
       password: document.getElementById('userPassword').value,
       phone: document.getElementById('userPhone').value,
-      dependents: parseInt(document.getElementById('userDependents').value) || 0
+      dependents: parseInt(document.getElementById('userDependents')?.value) || 0
     };
 
     try {
@@ -75,7 +72,7 @@ if (moneyForm) {
     const data = {
       donor_name: document.getElementById('donorName').value,
       amount: document.getElementById('amount').value,
-      business_id: 1 // Default or selected
+      business_id: 1 // Default to 1 if not specified
     };
 
     try {
@@ -105,24 +102,10 @@ if (foodForm) {
   foodForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Map selection to dummy meal_id for demo purposes (or implement dynamic meal selection)
-    // In a real app, you'd fetch business's menu to select what to donate.
-    // Here we act as if we are "buying" a meal for someone else as a donation?
-    // OR we just record it. Backend supports generic food donation if we send type='food'.
-
-    // NOTE: The backend expects meal_id if type='food'. 
-    // If this is a generic food drive, we might need a different backend handler.
-    // For now, let's assume valid meal_id is needed or we send generic money equivalent? 
-    // Let's stick to the backend logic: it expects meal_id. 
-    // We will simulate donating "Meal ID 1" for now or use a valid one if known.
-
-    // For simplicity in this demo, let's treat food donation as "donating money equivalent of food"
-    // OR we assume there is a 'Generic Meal' with ID 1 in the system.
-
     const data = {
-      donor_name: 'Anonymous Donor', // Can add field
+      donor_name: 'Anonymous Donor',
       type: 'food',
-      meal_id: 1, // specific meal ID
+      meal_id: 1, // Default dummy meal ID
       quantity: document.getElementById('quantity').value,
       business_id: 1
     };
@@ -158,12 +141,14 @@ if (businessForm) {
       name: document.getElementById('businessName').value,
       contact: document.getElementById('contact').value,
       email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
       address: document.getElementById('address').value,
-      people_count: parseInt(document.getElementById('people').value) || 0,
+      people_count: parseInt(document.getElementById('people')?.value) || 0,
       type: document.querySelector('input[name="type"]:checked')?.value || 'unknown'
     };
 
     try {
+      // Correct endpoint for registration is /businesses/register
       const response = await fetch('/businesses/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,9 +156,12 @@ if (businessForm) {
       });
 
       const result = await response.json();
+
       if (response.ok) {
         showNotification('Business registered successfully!', 'success');
         businessForm.reset();
+        // Redirect to login or home
+        setTimeout(() => window.location.href = '/', 2000);
       } else {
         showNotification('Error: ' + (result.error || 'Unknown error'), 'danger');
       }
@@ -184,7 +172,59 @@ if (businessForm) {
   });
 }
 
-// --- NEW FEATURES ---
+// Organization Dashboard Logic
+async function loadOrgDashboard(businessId) {
+  try {
+    console.log("Loading dashboard for business:", businessId);
+
+    // 1. Get Business Details
+    const busRes = await fetch(`/api/businesses/${businessId}`);
+    const business = await busRes.json();
+
+    if (busRes.ok) {
+      document.getElementById('orgName').textContent = business.name || 'Organization Dashboard';
+      document.getElementById('orgBalance').textContent = '₹' + (business.balance || 0).toFixed(2);
+
+      // Populate Edit Profile Form
+      if (document.getElementById('editContact')) document.getElementById('editContact').value = business.contact || '';
+      if (document.getElementById('editAddress')) document.getElementById('editAddress').value = business.address || '';
+      if (document.getElementById('editNeeds')) document.getElementById('editNeeds').value = business.needs || '';
+    } else {
+      console.error("Failed to load business details:", business);
+    }
+
+    // 2. Get Donations History
+    const donRes = await fetch(`/api/donations/business/${businessId}`);
+    const donData = await donRes.json();
+
+    if (donRes.ok) {
+      console.log("Donations loaded:", donData);
+      document.getElementById('totalDonationsCount').textContent = donData.total_donations || 0;
+
+      const tbody = document.getElementById('donationsBody');
+      if (tbody) {
+        if (donData.donations && donData.donations.length > 0) {
+          tbody.innerHTML = donData.donations.map(d => `
+                        <tr>
+                            <td>${new Date(d.timestamp).toLocaleDateString()}</td>
+                            <td>${d.donor_name}</td>
+                            <td><span class="badge bg-${d.type === 'money' ? 'success' : 'info'}">${d.type}</span></td>
+                            <td>${d.type === 'money' ? '₹' + d.amount : d.quantity + ' items'}</td>
+                        </tr>
+                    `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No donations received yet.</td></tr>';
+        }
+      }
+    } else {
+      console.error("Failed to load donations:", donData);
+    }
+
+  } catch (e) {
+    console.error("Error in loadOrgDashboard:", e);
+    showNotification("Failed to load dashboard data", 'danger');
+  }
+}
 
 // Transparency Report
 async function loadTransparencyReport() {
@@ -193,9 +233,9 @@ async function loadTransparencyReport() {
     const data = await response.json();
 
     if (data.impact_summary) {
-      document.getElementById('total-funds').innerText = '₹' + data.impact_summary.total_funds_raised;
-      document.getElementById('meals-provided').innerText = data.impact_summary.meals_provided;
-      document.getElementById('active-business').innerText = data.impact_summary.participating_businesses;
+      if (document.getElementById('total-funds')) document.getElementById('total-funds').innerText = '₹' + data.impact_summary.total_funds_raised;
+      if (document.getElementById('meals-provided')) document.getElementById('meals-provided').innerText = data.impact_summary.meals_provided;
+      if (document.getElementById('active-business')) document.getElementById('active-business').innerText = data.impact_summary.participating_businesses;
     }
 
     const tbody = document.getElementById('top-donors-list');
@@ -210,49 +250,5 @@ async function loadTransparencyReport() {
     }
   } catch (e) {
     console.error("Failed to load transparency report", e);
-  }
-}
-
-// User Dashboard
-async function loadUserDashboard() {
-  const userId = document.getElementById('userIdInput').value;
-  if (!userId) return alert("Please enter a User ID");
-
-  try {
-    const response = await fetch(`/api/users/${userId}/history`);
-    if (!response.ok) throw new Error("User not found");
-
-    const data = await response.json();
-
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('dashboard-content').style.display = 'block';
-
-    document.getElementById('user-name').innerText = data.user;
-    document.getElementById('user-role').innerText = data.role.toUpperCase();
-
-    // Donations
-    const donationList = document.getElementById('donation-list');
-    if (data.donations.length > 0) {
-      donationList.innerHTML = data.donations.map(d => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${d.type === 'food' ? '🍔 Food Donation' : '💰 Money Donation'}</span>
-                    <span class="badge bg-primary rounded-pill">₹${d.amount}</span>
-                </li>
-            `).join('');
-    }
-
-    // Claims
-    const mealList = document.getElementById('meal-list');
-    if (data.claimed_meals.length > 0) {
-      mealList.innerHTML = data.claimed_meals.map(m => `
-                <li class="list-group-item">
-                    Joined meal ID ${m.menu_id} <br>
-                    <small class="text-muted">${new Date(m.timestamp).toLocaleDateString()}</small>
-                </li>
-            `).join('');
-    }
-
-  } catch (e) {
-    alert(e.message);
   }
 }

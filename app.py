@@ -52,6 +52,10 @@ def create_app():
   def donor_dashboard_page():
     return render_template('donor_dashboard.html')
 
+  @app.route('/org-dashboard')
+  def org_dashboard_page():
+    return render_template('org_dashboard.html')
+
   @app.route('/in_need.html')
   def in_need_page_route(): 
     return render_template('in_need.html')

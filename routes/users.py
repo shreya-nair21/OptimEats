@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from datetime import date, datetime, time
 from sqlalchemy import func
+from werkzeug.security import generate_password_hash
 from models import db, User, Business, Meal, MealClaimed, Donation
 
 # Create a Blueprint instance for the user routes
@@ -24,7 +25,7 @@ def create_user():
             email=data['email'],
             phone=data.get('phone'),
             dependents=data.get('dependents', 0),
-            password= data.get('password') 
+            password=generate_password_hash(data.get('password')) if data.get('password') else None
         )
         db.session.add(new_user)
         db.session.commit()

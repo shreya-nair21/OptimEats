@@ -110,6 +110,14 @@
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
     <script>
+        function logout() {
+            // clear any local storage if used
+            localStorage.clear();
+            sessionStorage.clear();
+            // Redirect to home
+            window.location.href = '/';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const businessId = urlParams.get('id');

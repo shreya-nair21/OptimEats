@@ -148,7 +148,8 @@
                 const result = await res.json();
                 if (res.ok) {
                     alert('Donor Registered Successfully! Please Log In.');
-                    window.location.href = 'donor_dashboard.html'; // Redirect to dashboard or login
+                    alert('Donor Registered Successfully! Please Log In.');
+                    window.location.href = 'login.html'; // Redirect to login
                 } else {
                     alert('Error: ' + result.error);
                 }
@@ -180,7 +181,8 @@
                 const result = await res.json();
                 if (res.ok) {
                     alert('Organization Registered Successfully!');
-                    window.location.href = 'business.html'; // Redirect to business main or login
+                    alert('Organization Registered Successfully! Please Log In.');
+                    window.location.href = 'login.html'; // Redirect to login
                 } else {
                     alert('Error: ' + result.error);
                 }
