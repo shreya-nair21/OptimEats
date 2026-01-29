@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Dashboard - OptimEats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 70px;
+            background-color: #f8f9fa;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">OptimEats</a>
+            <div class="ms-auto">
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2 class="mb-4" id="orgName">Organization Dashboard</h2>
+
+        <div class="row">
+            <!-- Overview Section -->
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <h4>Overview</h4>
+                    <div class="stat-card mb-3">
+                        <div class="text-muted">Current Balance</div>
+                        <div class="stat-value" id="orgBalance">₹0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="text-muted">Total Donations</div>
+                        <div class="stat-value" id="totalDonationsCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Section -->
+                <div class="dashboard-card">
+                    <h4>Edit Profile</h4>
+                    <form id="editProfileForm">
+                        <div class="mb-2">
+                            <label class="form-label small">Contact</label>
+                            <input type="text" class="form-control form-control-sm" id="editContact">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Address</label>
+                            <textarea class="form-control form-control-sm" id="editAddress" rows="2"></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Needs Description</label>
+                            <textarea class="form-control form-control-sm" id="editNeeds" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Donations Table -->
+            <div class="col-md-8">
+                <div class="dashboard-card">
+                    <h4>Received Donations</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Donor</th>
+                                    <th>Type</th>
+                                    <th>Amount/Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody id="donationsBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const businessId = urlParams.get('id');
+            if (businessId) {
+                loadOrgDashboard(businessId);
+            } else {
+                alert('No organization ID provided.');
+                window.location.href = '/';
+            }
+        });
+    </script>
+</body>
+
+</html>

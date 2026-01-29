@@ -44,6 +44,10 @@ def create_app():
   def signup_page():
     return render_template('signup.html') 
   
+  @app.route('/login.html')
+  def login_page():
+    return render_template('login.html')
+  
   @app.route('/donor_dashboard.html')
   def donor_dashboard_page():
     return render_template('donor_dashboard.html')
@@ -64,10 +68,30 @@ def create_app():
   @app.route('/api/auth/login', methods=['POST'])
   def login_user():
     data = request.get_json()
-    user = User.query.filter_by(email=data.get('email')).first()
-    if user and user.password == data.get('password'): 
+    email = data.get('email')
+    password = data.get('password')
+
+    # Check User Table
+    user = User.query.filter_by(email=email).first()
+    if user and user.password and check_password_hash(user.password, password): 
       session['user_id'] = user.id
-      return jsonify({'message': 'Login successful', 'user': user.to_dict()}), 200
+      return jsonify({
+          'message': 'Login successful', 
+          'user': user.to_dict(),
+          'type': 'user',
+          'id': user.id
+      }), 200
+    
+    # Check Business Table
+    business = Business.query.filter_by(email=email).first()
+    if business and business.password and check_password_hash(business.password, password):
+         return jsonify({
+          'message': 'Login successful', 
+          'type': 'business',
+          'id': business.id,
+          'name': business.name
+      }), 200
+
     return jsonify({'error': 'Invalid credentials'}), 401
     
   
