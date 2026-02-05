@@ -3,17 +3,17 @@
 
 :root {
   /* Brand Palette */
-  --primary: #FF6B6B;       /* Warm Coral/Red */
+  --primary: #FF6B6B;
   --primary-hover: #EE5253;
-  --secondary: #4ECDC4;     /* Fresh Teal */
-  --secondary-hover: #3EB9B1;
-  
+  --secondary: #f14c64;
+  --secondary-hover: #b93e5b;
+
   /* Neutrals */
   --dark: #2D3436;
   --text: #636E72;
   --light: #F7F9FC;
   --white: #FFFFFF;
-  
+
   /* Utilities */
   --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1);
@@ -110,10 +110,20 @@ body {
 }
 
 /* Typography Helpers */
-.text-primary-custom { color: var(--primary); }
-.text-secondary-custom { color: var(--secondary); }
+.text-primary-custom {
+  color: var(--primary);
+}
 
-h1, h2, h3, h4, h5, h6 {
+.text-secondary-custom {
+  color: var(--secondary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   color: var(--dark);
 }
@@ -132,7 +142,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Notification */
 #notification-container .alert {
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    border: none;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  border: none;
 }
