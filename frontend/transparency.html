@@ -12,55 +12,55 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
   <style>
     body {
-      background-color: #fff7f7;
-      padding-top: 70px;
+      padding-top: 100px;
     }
 
     .stat-card {
-      background: white;
+      background: var(--light);
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 15px;
       text-align: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       margin-bottom: 20px;
     }
 
     .stat-number {
       font-size: 2.5rem;
-      font-weight: bold;
-      color: #2ecc71;
+      font-weight: 700;
+      color: var(--primary);
     }
 
     .chart-container {
       background: white;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
       margin-bottom: 20px;
       height: 300px;
     }
 
     #map {
       height: 400px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
     }
   </style>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
       <a class="navbar-brand" href="/">OptimEats</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Homepage</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-bold" href="/">Homepage</a></li>
         </ul>
       </div>
     </div>
   </nav>
-</head>
-
-<body>
   <div class="container mt-5">
     <h1 class="text-center mb-5">Transparency & Impact</h1>
 

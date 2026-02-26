@@ -6,39 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
   <style>
     body {
-      background-color: #fff7f7;
-      padding-top: 70px;
+      padding-top: 100px;
     }
   </style>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
       <a class="navbar-brand" href="/">OptimEats</a>
       <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="business.html">Business Portal</a></li>
-          <li class="nav-item"><a class="nav-link" href="donations.html">User Portal</a></li>
-          <li class="nav-item"><a class="nav-link" href="in_need.html">In-Need Meals</a></li>
+        <ul class="navbar-nav ms-auto align-items-center gap-3">
+          <li class="nav-item"><a class="nav-link text-dark fw-bold" href="business.html">Business Portal</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-bold" href="donations.html">User Portal</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-bold" href="in_need.html">In-Need Meals</a></li>
         </ul>
       </div>
     </div>
   </nav>
-</head>
-
-<body>
   <div class="container mt-5">
 
     <!-- Login / ID Input -->
     <div id="login-section" class="row justify-content-center">
       <div class="col-md-6">
-        <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
-          <h4 class="text-center mb-3 text-primary">View Your History</h4>
+        <div class="custom-card p-4 border-0">
+          <h4 class="text-center mb-3 text-primary-custom">View Your History</h4>
           <div class="mb-3">
             <label class="form-label">Enter User ID</label>
             <input type="number" id="userIdInput" class="form-control" placeholder="e.g., 1">
           </div>
-          <button onclick="loadUserDashboard()" class="btn btn-primary w-100">Load Dashboard</button>
+          <button onclick="loadUserDashboard()" class="btn btn-primary-custom w-100 mt-2">Load Dashboard</button>
         </div>
       </div>
     </div>
@@ -53,8 +53,8 @@
       <div class="row">
         <!-- Donation History -->
         <div class="col-md-6">
-          <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
-            <div class="card-header bg-success text-white" style="border-radius: 12px 12px 0 0;">Your Donations</div>
+          <div class="custom-card mb-4 border-0">
+            <div class="card-header text-white" style="background-color: var(--primary);">Your Donations</div>
             <ul class="list-group list-group-flush" id="donation-list">
               <li class="list-group-item text-muted">No donations found.</li>
             </ul>
@@ -63,8 +63,8 @@
 
         <!-- Meal History -->
         <div class="col-md-6">
-          <div class="card shadow-sm mb-4 border-0" style="border-radius: 12px;">
-            <div class="card-header bg-warning text-dark" style="border-radius: 12px 12px 0 0;">Meals Claimed</div>
+          <div class="custom-card mb-4 border-0">
+            <div class="card-header text-white" style="background-color: var(--secondary);">Meals Claimed</div>
             <ul class="list-group list-group-flush" id="meal-list">
               <li class="list-group-item text-muted">No meals claimed.</li>
             </ul>
