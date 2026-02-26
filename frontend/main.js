@@ -69,10 +69,13 @@ if (moneyForm) {
   moneyForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const businessDropdown = document.getElementById('business-dropdown');
+    const selectedBusiness = businessDropdown ? businessDropdown.value : 1;
+
     const data = {
       donor_name: document.getElementById('donorName').value,
       amount: document.getElementById('amount').value,
-      business_id: 1 // Default to 1 if not specified
+      business_id: parseInt(selectedBusiness)
     };
 
     try {

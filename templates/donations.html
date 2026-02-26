@@ -32,7 +32,6 @@
     }
   </style>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-<<<<<<< HEAD:frontend/donations.html
     <div class="container-fluid">
       <a class="navbar-brand" href="#">OptimEats</a>
       <div class="collapse navbar-collapse">
@@ -51,23 +50,6 @@
           </li>
         </ul>
       </div>
-=======
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">OptimEats</a>
-    <!-- Optional: add links here -->
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link " href="home.html">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" href="donations.html">Donations</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="business.html">Business</a>
-        </li>
-      </ul>
->>>>>>> 6dc93cedb7800b80c6ece16c67487b20e6efe742:templates/donations.html
     </div>
   </nav>
 
@@ -77,63 +59,21 @@
 
   <body>
 
-<<<<<<< HEAD:frontend/donations.html
-    <!-- MONEY DONATION FORM -->
     <div class="form-card">
       <h4 class="text-center mb-4">Money Donation</h4>
       <form id="moneyDonationForm">
+
+        <div class="mb-3">
+          <label for="business-dropdown" class="form-label">Select a Business</label>
+          <select class="form-select" id="business-dropdown" name="businesses" required>
+            <option value="">Loading...</option>
+          </select>
+        </div>
+
         <div class="mb-3">
           <label for="donorName" class="form-label">Donor Name</label>
           <input type="text" class="form-control" id="donorName" required>
         </div>
-=======
-      <div class="all-business">
-              <label for="business-dropdown">Select a business:</label>
-              <select id="business-dropdown" name="businesses">
-                  <option value="">Loading...</option>
-              </select>
-          </div>
-        
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dropdown = document.getElementById('business-dropdown');
-
-            // Function to fetch data and populate the dropdown
-            async function getBusinesses() {
-                try {
-                    const response = await fetch('/businesses');
-                    
-                    // Check if the response is ok (status code 200-299)
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const businesses = await response.json();
-                    
-                    // Clear the "Loading..." option
-                    dropdown.innerHTML = '<option value="">-- Select a Business --</option>';
-                    
-                    // Populate the dropdown with received data
-                    businesses.forEach(business => {
-                        const option = document.createElement('option');
-                        option.value = business.id;
-                        option.textContent = business.name;
-                        dropdown.appendChild(option);
-                    });
-
-                } catch (error) {
-                    console.error("Could not fetch business data:", error);
-                    dropdown.innerHTML = '<option value="">Error loading businesses</option>';
-                }
-            }
-            getBusinesses();
-        });
-    </script>
-      
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  </div>
->>>>>>> 6dc93cedb7800b80c6ece16c67487b20e6efe742:templates/donations.html
 
         <div class="mb-3">
           <label for="amount" class="form-label">Donation Amount</label>
@@ -143,6 +83,39 @@
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const dropdown = document.getElementById('business-dropdown');
+
+        // Function to fetch data and populate the dropdown
+        async function getBusinesses() {
+          try {
+            const response = await fetch('/businesses');
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const businesses = await response.json();
+
+            dropdown.innerHTML = '<option value="">-- Select a Business --</option>';
+
+            businesses.forEach(business => {
+              const option = document.createElement('option');
+              option.value = business.id;
+              option.textContent = business.name;
+              dropdown.appendChild(option);
+            });
+
+          } catch (error) {
+            console.error("Could not fetch business data:", error);
+            dropdown.innerHTML = '<option value="">Error loading businesses</option>';
+          }
+        }
+        getBusinesses();
+      });
+    </script>
 
     <!-- FOOD DONATION FORM -->
     <div class="form-card">

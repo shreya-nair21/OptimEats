@@ -32,6 +32,9 @@ def handle_donation():
              # Recalculate or override amount for food donation
              total_value = meal.price * quantity
              amount = total_value
+        else:
+             # Generic food donation without a specific meal attached
+             amount = 0
     
     if donation_type == 'clothes':
         quantity = int(data.get('quantity', 1))

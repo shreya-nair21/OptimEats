@@ -4,164 +4,531 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - OptimEats</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Authentication - OptimEats</title>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
     <style>
-        body,
-        html {
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Existing overlay background from old login.html */
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=1740');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        p {
+            font-size: 14px;
+            font-weight: 100;
+            line-height: 20px;
+            letter-spacing: 0.5px;
+            margin: 20px 0 30px;
+        }
+
+        span {
+            font-size: 12px;
+            color: #333;
+        }
+
+        a {
+            color: #333;
+            font-size: 14px;
+            text-decoration: none;
+            margin: 15px 0;
+        }
+
+        button {
+            border-radius: 20px;
+            border: 1px solid #FF4B2B;
+            background-color: #FF4B2B;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: transform 80ms ease-in;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        button.ghost {
+            background-color: transparent;
+            border-color: #FFFFFF;
+        }
+
+        form {
+            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 50px;
             height: 100%;
+            text-align: center;
+        }
+
+        .scrollable-form {
+            overflow-y: auto;
+            max-height: 100%;
+            width: 100%;
+            padding: 40px 50px;
+            /* Adjust padding for scrollbar */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Custom scrollbar for form in case it gets long */
+        .scrollable-form::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-form::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 10px;
+        }
+
+        input,
+        select,
+        textarea {
+            background-color: #eee;
+            border: none;
+            padding: 12px 15px;
+            margin: 8px 0;
+            width: 100%;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4),
+                0 10px 10px rgba(0, 0, 0, 0.22);
+            position: relative;
+            overflow: hidden;
+            width: 900px;
+            /* Increased width to accommodate larger forms */
+            max-width: 100%;
+            min-height: 600px;
+            /* Increased height */
+        }
+
+        .form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sign-in-container {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+            opacity: 1;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .container.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .sign-up-container {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .container.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+
+        @keyframes show {
+
+            0%,
+            49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        .overlay-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .container.right-panel-active .overlay-container {
+            transform: translateX(-100%);
+        }
+
+        .overlay {
+            background: #FF416C;
+            background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
+            background: linear-gradient(to right, #FF4B2B, #FF416C);
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 0 0;
+            color: #FFFFFF;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .container.right-panel-active .overlay {
+            transform: translateX(50%);
+        }
+
+        .overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .overlay-left {
+            transform: translateX(-20%);
+        }
+
+        .container.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .overlay-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .container.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+
+        .social-container {
+            margin: 20px 0;
+        }
+
+        .social-container a {
+            border: 1px solid #DDDDDD;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 5px;
+            height: 40px;
+            width: 40px;
+            color: #333;
+            text-decoration: none;
+            transition: .3s;
+        }
+
+        .social-container a:hover {
+            background-color: #eee;
+        }
+
+        /* Toggle Switches for Account Type */
+        .account-type-toggle {
+            display: flex;
+            width: 100%;
+            margin: 15px 0;
+            background: #eee;
+            border-radius: 20px;
             overflow: hidden;
         }
 
-        .split-layout {
-            display: flex;
-            height: 100vh;
-            width: 100%;
-        }
-
-        .side-image {
+        .account-type-toggle label {
             flex: 1;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=1740');
-            /* Professional community/food image */
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 60px;
-            color: white;
-        }
-
-        .side-form {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px;
-            background: white;
-            max-width: 600px;
-        }
-
-        .login-wrapper {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .brand-logo {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0;
-            color: white;
-            text-decoration: none;
-        }
-
-        .quote-box {
-            border-left: 4px solid var(--primary);
-            padding-left: 20px;
-        }
-
-        .quote-text {
-            font-size: 1.5rem;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 13px;
             font-weight: 600;
-            line-height: 1.4;
+            color: #777;
+            transition: 0.3s;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 900px) {
-            .side-image {
-                display: none;
-            }
+        .account-type-toggle input[type="radio"] {
+            display: none;
+        }
 
-            .side-form {
-                max-width: 100%;
-                padding: 20px;
-            }
+        .account-type-toggle input[type="radio"]:checked+label {
+            background: #FF4B2B;
+            color: white;
+        }
+
+        /* Dynamic form sections */
+        .dynamic-form-section {
+            display: none;
+            width: 100%;
+        }
+
+        .dynamic-form-section.active {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .radio-group label {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
+        /* Brand Logo Top */
+        .brand-logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            z-index: 1000;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="split-layout">
-        <!-- Left Side: Brand & visual -->
-        <div class="side-image">
-            <a href="/" class="brand-logo">OptimEats</a>
-            <div class="quote-box">
-                <p class="quote-text">"The best way to find yourself is to lose yourself in the service of others."</p>
-                <p class="mb-0 opacity-75">— Mahatma Gandhi</p>
+    <a href="/" class="brand-logo">OptimEats</a>
+
+    <div class="container" id="container">
+        <!-- SIGN UP -->
+        <div class="form-container sign-up-container">
+            <div class="scrollable-form" style="justify-content: flex-start; padding-top: 20px;">
+                <h1>Create Account</h1>
+
+                <div class="account-type-toggle mt-3" style="flex-shrink: 0;">
+                    <input type="radio" id="signup-donor" name="signup_type" value="donor" checked>
+                    <label for="signup-donor">Donor</label>
+                    <input type="radio" id="signup-org" name="signup_type" value="organization">
+                    <label for="signup-org">Organization</label>
+                </div>
+
+                <span style="flex-shrink: 0;">or use your email for registration</span>
+
+                <form id="signUpForm" action="#" style="width: 100%; padding:0; height: auto;">
+
+                    <!-- Donor Fields -->
+                    <div id="donor-signup-fields" class="dynamic-form-section active">
+                        <input type="text" id="donorName" placeholder="Full Name" required />
+                        <input type="email" id="donorEmail" placeholder="Email" required />
+                        <input type="password" id="donorPassword" placeholder="Password" required />
+                        <input type="tel" id="donorPhone" placeholder="Phone Number" />
+                    </div>
+
+                    <!-- Organization Fields -->
+                    <div id="org-signup-fields" class="dynamic-form-section">
+                        <div class="radio-group" style="flex-wrap: wrap;">
+                            <label>
+                                <input type="radio" name="orgType" value="old_age_home" checked>
+                                Old Age Home
+                            </label>
+                            <label>
+                                <input type="radio" name="orgType" value="orphanage">
+                                Orphanage
+                            </label>
+                        </div>
+                        <input type="text" id="orgName" placeholder="Organization Name" required disabled />
+                        <input type="text" id="orgContact" placeholder="Contact Person / Info" required disabled />
+                        <input type="email" id="orgEmail" placeholder="Email Address" required disabled />
+                        <input type="password" id="orgPassword" placeholder="Password" required disabled />
+                        <input type="number" id="orgPeople" placeholder="Count of People (Children/Elders)" required
+                            disabled />
+                        <textarea id="orgNeeds" rows="2" placeholder="Urgent Needs (e.g., Rice, Clothes)"></textarea>
+                        <textarea id="orgAddress" rows="2" placeholder="Full Address" required disabled></textarea>
+                    </div>
+
+                    <button type="submit" id="signUpSubmitBtn">Sign Up</button>
+                </form>
             </div>
         </div>
 
-        <!-- Right Side: Clean Form -->
-        <div class="side-form">
-            <div class="login-wrapper">
-                <div class="mb-5">
-                    <h2 class="fw-bold text-dark mb-1">Welcome back</h2>
-                    <p class="text-muted">Please enter your details to sign in.</p>
-                </div>
+        <!-- SIGN IN -->
+        <div class="form-container sign-in-container">
+            <div class="scrollable-form" style="justify-content: center;">
+                <form id="signInForm" action="#" style="width: 100%; padding: 0; height: auto;">
+                    <h1>Sign in</h1>
+                    <div class="social-container">
+                        <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social"><i class="fab fa-google"></i></a>
+                        <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <span>or use your account</span>
 
-                <form id="loginForm">
-                    <div class="mb-4">
-                        <label for="email" class="form-label small fw-bold text-uppercase text-muted"
-                            style="font-size: 0.75rem; letter-spacing: 1px;">Email Address</label>
-                        <input type="email" class="form-control bg-light border-0 py-3" id="email" required
-                            placeholder="name@company.com">
+                    <div class="account-type-toggle">
+                        <input type="radio" id="signin-donor" name="login_type" value="user" checked>
+                        <label for="signin-donor">Donor</label>
+                        <input type="radio" id="signin-org" name="login_type" value="business">
+                        <label for="signin-org">Organization</label>
                     </div>
 
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label for="password" class="form-label small fw-bold text-uppercase text-muted"
-                                style="font-size: 0.75rem; letter-spacing: 1px;">Password</label>
-                            <a href="#" class="small text-decoration-none text-muted">Forgot password?</a>
-                        </div>
-                        <input type="password" class="form-control bg-light border-0 py-3" id="password" required
-                            placeholder="••••••••">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-uppercase text-muted d-block mb-2"
-                            style="font-size: 0.75rem; letter-spacing: 1px;">Account Type</label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <label
-                                    class="btn btn-outline-light text-dark border w-100 py-2 d-flex align-items-center justify-content-center gap-2">
-                                    <input type="radio" name="login_type" value="user" checked
-                                        class="form-check-input mt-0">
-                                    <span>Donor</span>
-                                </label>
-                            </div>
-                            <div class="col-6">
-                                <label
-                                    class="btn btn-outline-light text-dark border w-100 py-2 d-flex align-items-center justify-content-center gap-2">
-                                    <input type="radio" name="login_type" value="business"
-                                        class="form-check-input mt-0">
-                                    <span>Organization</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold rounded-3">Sign in</button>
+                    <input type="email" id="signinEmail" placeholder="Email" required />
+                    <input type="password" id="signinPassword" placeholder="Password" required />
+                    <a href="#">Forgot your password?</a>
+                    <button type="submit" id="signInSubmitBtn">Sign In</button>
                 </form>
+            </div>
+        </div>
 
-                <div class="text-center mt-4">
-                    <p class="text-muted small">Don't have an account? <a href="signup.html"
-                            class="text-dark fw-bold text-decoration-none">Create free account</a></p>
+        <!-- OVERLAYS -->
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Welcome Back!</h1>
+                    <p>To keep connected with us please login with your personal info</p>
+                    <button class="ghost" id="signIn">Sign In</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Hello, Friend!</h1>
+                    <p>Enter your details and start journey with us to eliminate food waste</p>
+                    <button class="ghost" id="signUp">Sign Up</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        // --- Slider Logic ---
+        const signUpBtn = document.getElementById('signUp');
+        const signInBtn = document.getElementById('signIn');
+        const container = document.getElementById('container');
+
+        signUpBtn.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
+        });
+
+        signInBtn.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
+
+        // --- Signup Form Toggle Logic ---
+        const donorSignupFields = document.getElementById('donor-signup-fields');
+        const orgSignupFields = document.getElementById('org-signup-fields');
+
+        const signupDonorRadio = document.getElementById('signup-donor');
+        const signupOrgRadio = document.getElementById('signup-org');
+
+        function toggleSignupFields() {
+            if (signupDonorRadio.checked) {
+                donorSignupFields.classList.add('active');
+                orgSignupFields.classList.remove('active');
+
+                // Enable donor fields, disable org fields for validation purposes
+                donorSignupFields.querySelectorAll('input').forEach(el => el.disabled = false);
+                orgSignupFields.querySelectorAll('input, textarea').forEach(el => {
+                    // Don't disable the radio buttons for org type!
+                    if (el.type !== 'radio') el.disabled = true;
+                });
+            } else {
+                donorSignupFields.classList.remove('active');
+                orgSignupFields.classList.add('active');
+
+                // Disable donor fields, enable org fields for validation
+                donorSignupFields.querySelectorAll('input').forEach(el => el.disabled = true);
+                orgSignupFields.querySelectorAll('input, textarea').forEach(el => el.disabled = false);
+            }
+        }
+
+        signupDonorRadio.addEventListener('change', toggleSignupFields);
+        signupOrgRadio.addEventListener('change', toggleSignupFields);
+
+
+        // --- API Submission Logic - Sign In ---
+        document.getElementById('signInForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = e.target.querySelector('button');
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+            const btn = document.getElementById('signInSubmitBtn');
             const originalText = btn.innerText;
 
             btn.innerText = 'Signing in...';
@@ -183,13 +550,84 @@
                         window.location.href = '/donor_dashboard.html';
                     }
                 } else {
-                    alert(result.error);
+                    alert(result.error || 'Login Failed');
                     btn.innerText = originalText;
                     btn.disabled = false;
                 }
             } catch (error) {
                 console.error('Error logging in:', error);
                 alert('Login failed. Please check your connection.');
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // --- API Submission Logic - Sign Up ---
+        document.getElementById('signUpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('signUpSubmitBtn');
+            const originalText = btn.innerText;
+
+            btn.innerText = 'Registering...';
+            btn.disabled = true;
+
+            try {
+                if (signupDonorRadio.checked) {
+                    // Donor Registration
+                    const data = {
+                        name: document.getElementById('donorName').value,
+                        email: document.getElementById('donorEmail').value,
+                        password: document.getElementById('donorPassword').value,
+                        phone: document.getElementById('donorPhone').value
+                    };
+
+                    const res = await fetch('/api/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await res.json();
+                    if (res.ok) {
+                        alert('Donor Registered Successfully! Please Log In.');
+                        container.classList.remove("right-panel-active"); // Slide back to login
+                        document.getElementById('signUpForm').reset();
+                    } else {
+                        alert('Error: ' + (result.error || 'Registration Failed'));
+                    }
+
+                } else {
+                    // Org Registration
+                    const data = {
+                        type: document.querySelector('input[name="orgType"]:checked').value,
+                        name: document.getElementById('orgName').value,
+                        contact: document.getElementById('orgContact').value,
+                        email: document.getElementById('orgEmail').value,
+                        password: document.getElementById('orgPassword').value,
+                        people_count: document.getElementById('orgPeople').value,
+                        needs: document.getElementById('orgNeeds').value,
+                        address: document.getElementById('orgAddress').value
+                    };
+
+                    const res = await fetch('/businesses/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await res.json();
+                    if (res.ok) {
+                        alert('Organization Registered Successfully! Please Log In.');
+                        container.classList.remove("right-panel-active"); // Slide back to login
+                        document.getElementById('signUpForm').reset();
+                    } else {
+                        alert('Error: ' + (result.error || 'Registration Failed'));
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Request failed. Please check connection.');
+            } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
