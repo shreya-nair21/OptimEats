@@ -89,7 +89,8 @@ def create_app():
     # Check Business Table
     business = Business.query.filter_by(email=email).first()
     if business and business.password and check_password_hash(business.password, password):
-         return jsonify({
+      session['business_id'] = business.id
+      return jsonify({
           'message': 'Login successful', 
           'type': 'business',
           'id': business.id,
