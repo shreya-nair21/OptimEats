@@ -1,12 +1,14 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from sqlalchemy import func, desc
 from models import db, Donation, Business, User, Meal, MealClaimed
+from utils.decorators import donor_required
 
 donations_blueprint = Blueprint('donations', __name__)
 
 # --- DONATION TRANSACTION ---
 
 @donations_blueprint.route('/api/donations', methods=['POST'])
+@donor_required
 def handle_donation():
     """
     Handles a monetary donation transaction.
@@ -110,7 +112,11 @@ def get_business_donations(business_id):
         return jsonify({'error': 'Failed to retrieve donations', 'details': str(e)}), 500
 
 @donations_blueprint.route('/api/donations/user/<int:user_id>', methods=['GET'])
+@donor_required
 def get_user_donations(user_id):
+    if session.get('user_id') != user_id:
+         return jsonify({'error': 'Unauthorized: Cannot view another donor history.'}), 403
+
     try:
        donations = Donation.query.filter_by(user_id=user_id).order_by(Donation.timestamp.desc()).all()
        return jsonify({
