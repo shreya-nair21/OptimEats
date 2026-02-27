@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash
 from models import db, Business, Meal
+from utils.decorators import business_required
 
 businesses_blueprint = Blueprint('businesses', __name__)
 
@@ -74,7 +75,12 @@ def delete_business(id):
 # --- MENU MANAGEMENT ---
 
 @businesses_blueprint.route('/api/businesses/<int:business_id>/menu', methods=['POST'])
+@business_required
 def add_menu_item(business_id):
+    # Ensure a business can only add items for themselves
+    if session.get('business_id') != business_id:
+         return jsonify({'error': 'Unauthorized: Cannot modify another organization menu.'}), 403
+  
     business = Business.query.get_or_404(business_id)
     data = request.get_json()
 
@@ -119,7 +125,11 @@ def get_business_menu(business_id):
         return jsonify({'error': 'Failed to retrieve menu', 'details': str(e)}), 500
 
 @businesses_blueprint.route('/api/businesses/<int:business_id>/menu/<int:meal_id>', methods=['PUT'])
+@business_required
 def update_menu_item(business_id, meal_id):
+    if session.get('business_id') != business_id:
+         return jsonify({'error': 'Unauthorized: Cannot modify another organization menu.'}), 403
+
     meal = Meal.query.get_or_404(meal_id)
     if meal.business_id != business_id:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -144,7 +154,11 @@ def update_menu_item(business_id, meal_id):
         return jsonify({'error': 'Failed to update menu item', 'details': str(e)}), 400
 
 @businesses_blueprint.route('/api/businesses/<int:business_id>/menu/<int:meal_id>', methods=['DELETE'])
+@business_required
 def delete_menu_item(business_id, meal_id):
+    if session.get('business_id') != business_id:
+         return jsonify({'error': 'Unauthorized: Cannot modify another organization menu.'}), 403
+
     meal = Meal.query.get_or_404(meal_id)
     if meal.business_id != business_id:
         return jsonify({'error': 'Unauthorized'}), 403
