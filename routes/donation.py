@@ -159,4 +159,3 @@ def transparency_report():
         },
         'top_donors': [{'name': name, 'amount': amount} for name, amount in top_donors]
     })
-

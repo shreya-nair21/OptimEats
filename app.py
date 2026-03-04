@@ -2,13 +2,13 @@ from flask import Flask, render_template, session, jsonify, request
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-
 from models import db, User, Business
 
 from meals import meals_blueprint
 from routes.business import businesses_blueprint
 from routes.donation import donations_blueprint
 from routes.users import users_blueprint
+from routes.auth import auth_blueprint
 
 def create_app():
   app = Flask(__name__, template_folder='frontend', static_folder='frontend')
@@ -26,6 +26,7 @@ def create_app():
   app.register_blueprint(businesses_blueprint)
   app.register_blueprint(donations_blueprint)
   app.register_blueprint(users_blueprint)
+  app.register_blueprint(auth_blueprint)
 
   # Routes to serve HTML files
   @app.route('/')
@@ -67,6 +68,14 @@ def create_app():
   @app.route('/dashboard.html')
   def dashboard_page():
     return render_template('dashboard.html')
+
+  @app.route('/forgot_password.html')
+  def forgot_password_page():
+    return render_template('forgot_password.html')
+
+  @app.route('/reset_password.html')
+  def reset_password_page():
+    return render_template('reset_password.html')
 
   # AUTHENTICATION ROUTES 
   @app.route('/api/auth/login', methods=['POST'])

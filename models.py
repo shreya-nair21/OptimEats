@@ -29,7 +29,8 @@ class Business(db.Model):
     contact = db.Column(db.String(100), nullable=False) 
     address = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=True) 
+    password = db.Column(db.String(200), nullable=True) # Nullable for OAuth
+    google_id = db.Column(db.String(255), unique=True, nullable=True) # For Google OAuth
     type = db.Column(db.String(50), nullable=True)
     people_count = db.Column(db.Integer, nullable=True)
     balance = db.Column(db.Float, default=0.0)
@@ -62,7 +63,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=True) 
+    password = db.Column(db.String(200), nullable=True) # Nullable for OAuth
+    google_id = db.Column(db.String(255), unique=True, nullable=True) # For Google OAuth
     phone = db.Column(db.String(20), unique=True, nullable=True)
     total_meals = db.Column(db.Integer, default=2)
     dependents = db.Column(db.Integer, default=0)

@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>In Need Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
   <style>
     body {
@@ -185,6 +187,10 @@
       Loading available meals...
     </div>
 
+    <div id="map"
+      style="height: 350px; border-radius: 10px; margin-bottom: 30px; display: none; z-index: 1; border: 2px solid #ecf0f1;">
+    </div>
+
     <div id="meals-container" class="meals-grid" style="display: none;"></div>
 
     <div id="no-meals" class="no-meals" style="display: none;">
@@ -222,6 +228,9 @@
 
         container.style.display = 'grid';
         container.innerHTML = data.meals.map(meal => createMealCard(meal)).join('');
+
+        // Initialize Map
+        initMapDisplay(data.meals);
 
       } catch (error) {
         loading.style.display = 'none';
@@ -282,6 +291,69 @@
         }
       } catch (error) {
         messageContainer.innerHTML = `<div class="error"> Error: ${error.message}</div>`;
+      }
+    }
+
+    let mapInstance = null;
+    let markers = [];
+
+    async function initMapDisplay(meals) {
+      const mapDiv = document.getElementById('map');
+      mapDiv.style.display = 'block';
+
+      if (!mapInstance) {
+        // Default center if no coords found
+        mapInstance = L.map('map').setView([20.5937, 78.9629], 4); // India roughly
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapInstance);
+      }
+
+      // Clear old markers
+      markers.forEach(m => mapInstance.removeLayer(m));
+      markers = [];
+
+      // Extract unique businesses with their address
+      const businesses = {};
+      meals.forEach(m => {
+        if (m.business_address) {
+          if (!businesses[m.business_id]) {
+            businesses[m.business_id] = {
+              name: m.business_name,
+              address: m.business_address,
+              mealsCount: 1
+            };
+          } else {
+            businesses[m.business_id].mealsCount++;
+          }
+        }
+      });
+
+      let bounds = [];
+
+      // Geocode each unique address via free Nominatim API
+      for (const [id, org] of Object.entries(businesses)) {
+        try {
+          // small delay to respect rate limit of 1 req/sec ideally, but we will fetch directly
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(org.address)}`);
+          const data = await res.json();
+
+          if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+
+            const marker = L.marker([lat, lon]).addTo(mapInstance)
+              .bindPopup(`<b>${org.name}</b><br>${org.address}<br><i>${org.mealsCount} meals available</i>`);
+            markers.push(marker);
+            bounds.push([lat, lon]);
+          }
+        } catch (e) {
+          console.error("Geocoding error for " + org.address, e);
+        }
+      }
+
+      if (bounds.length > 0) {
+        mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
       }
     }
   </script>

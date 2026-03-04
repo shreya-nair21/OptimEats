@@ -88,6 +88,7 @@ def get_available_meals():
                     'business_id': business.id,
                     'business_name': business.name,
                     'business_balance': business.balance,
+                    'business_address': business.address,
                     'can_claim': business.balance >= meal.price
                 })
         

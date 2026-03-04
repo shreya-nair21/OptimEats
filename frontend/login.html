@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authentication - OptimEats</title>
     <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet"> -->
     <style>
         @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
@@ -110,13 +110,14 @@
 
         .scrollable-form {
             overflow-y: auto;
-            max-height: 100%;
+            height: 100%;
             width: 100%;
             padding: 40px 50px;
-            /* Adjust padding for scrollbar */
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            /* This centers the content vertically */
         }
 
         /* Custom scrollbar for form in case it gets long */
@@ -277,27 +278,7 @@
             transform: translateX(20%);
         }
 
-        .social-container {
-            margin: 20px 0;
-        }
 
-        .social-container a {
-            border: 1px solid #DDDDDD;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 5px;
-            height: 40px;
-            width: 40px;
-            color: #333;
-            text-decoration: none;
-            transition: .3s;
-        }
-
-        .social-container a:hover {
-            background-color: #eee;
-        }
 
         /* Toggle Switches for Account Type */
         .account-type-toggle {
@@ -383,8 +364,8 @@
     <div class="container" id="container">
         <!-- SIGN UP -->
         <div class="form-container sign-up-container">
-            <div class="scrollable-form" style="justify-content: flex-start; padding-top: 20px;">
-                <h1>Create Account</h1>
+            <div class="scrollable-form">
+                <h1 style="margin-bottom: 10px;">Create Account</h1>
 
                 <div class="account-type-toggle mt-3" style="flex-shrink: 0;">
                     <input type="radio" id="signup-donor" name="signup_type" value="donor" checked>
@@ -393,7 +374,6 @@
                     <label for="signup-org">Organization</label>
                 </div>
 
-                <span style="flex-shrink: 0;">or use your email for registration</span>
 
                 <form id="signUpForm" action="#" style="width: 100%; padding:0; height: auto;">
 
@@ -434,15 +414,14 @@
 
         <!-- SIGN IN -->
         <div class="form-container sign-in-container">
-            <div class="scrollable-form" style="justify-content: center;">
+            <div class="scrollable-form">
                 <form id="signInForm" action="#" style="width: 100%; padding: 0; height: auto;">
-                    <h1>Sign in</h1>
+                    <h1 style="margin-bottom: 20px;">Sign In</h1>
                     <div class="social-container">
                         <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social"><i class="fab fa-google"></i></a>
                         <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
                     </div>
-                    <span>or use your account</span>
 
                     <div class="account-type-toggle">
                         <input type="radio" id="signin-donor" name="login_type" value="user" checked>
@@ -453,7 +432,7 @@
 
                     <input type="email" id="signinEmail" placeholder="Email" required />
                     <input type="password" id="signinPassword" placeholder="Password" required />
-                    <a href="#">Forgot your password?</a>
+                    <a href="/forgot_password.html">Forgot your password?</a>
                     <button type="submit" id="signInSubmitBtn">Sign In</button>
                 </form>
             </div>
