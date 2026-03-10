@@ -1,4 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
+MEALS_PER_DEPENDENT = 2`nfrom flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import CheckConstraint
 from datetime import datetime
 from enum import Enum
