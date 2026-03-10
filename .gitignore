@@ -11,3 +11,4 @@ build/
 .gemini/
 *.db
 *.sqlite3
+.env
